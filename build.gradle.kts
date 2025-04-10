@@ -6,4 +6,9 @@ plugins {
     alias(libs.plugins.composeMultiplatform) apply false
     alias(libs.plugins.composeCompiler) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.kotlin.parcelize) apply false
+    alias(libs.plugins.buildConfig) apply false
+//    alias(libs.plugins.composeHotReload) apply false // TODO: try to use later on
+    alias(libs.plugins.modulegraph)
 }

@@ -8,6 +8,9 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.kotlin.parcelize)
+//    alias(libs.plugins.composeHotReload) TODO: adding compose hot reload plugin
 }
 
 kotlin {
@@ -58,19 +61,18 @@ kotlin {
             implementation(libs.androidx.activity.compose)
 
             implementation(libs.koin.android)
+            implementation(libs.ktor.client.android)
             implementation(libs.koin.androidx.compose)
+            implementation(libs.kotlinx.coroutines.android)
 
             // currently web does not seems to have lifecycle-viewmodel so that we need to duplicate
             // the dependency for android, iOS and desktop
             // Could not resolve androidx.lifecycle:lifecycle-viewmodel:2.9.0-alpha05 for :composeApp:wasmJsMain
-            api(libs.koin.core)
-            implementation(libs.koin.compose)
             implementation(libs.lifecycle.viewmodel)
-            implementation(libs.navigation.compose)
-            implementation(libs.ktor.client.okhttp)
-            implementation(libs.kotlinx.coroutines.android)
         }
         commonMain.dependencies {
+            // feature goes here
+
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material)
@@ -82,23 +84,20 @@ kotlin {
 
             api(libs.koin.core)
             implementation(libs.ktor.client.core)
+
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.navigation.compose)
+            implementation(libs.koin.compose)
         }
         iosMain.dependencies {
-            api(libs.koin.core)
-            implementation(libs.koin.compose)
-            implementation(libs.lifecycle.viewmodel)
-            implementation(libs.navigation.compose)
             implementation(libs.ktor.client.darwin)
+            implementation(libs.lifecycle.viewmodel)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
 
-            api(libs.koin.core)
-            implementation(libs.koin.compose)
             implementation(libs.lifecycle.viewmodel)
-            implementation(libs.navigation.compose)
         }
     }
 }
