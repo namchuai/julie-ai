@@ -34,3 +34,7 @@ include(":composeApp")
 include(":core:model")
 include(":core:network")
 include(":core:designsystem")
+include(":core:data")
+
+include(":feature:chat")
+include(":feature:model-management")
