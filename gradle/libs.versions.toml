@@ -25,6 +25,7 @@ kotlinx_serialization_json = "1.8.0"
 buildConfig = "5.5.4"
 compose-hot-reload = "1.0.0-dev.34.1"
 modulegraph = "0.12.0"
+markdownRenderer = "0.32.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -45,6 +46,7 @@ koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", versi
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koinComposeMultiplatform" }
 navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+markdown-renderer = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdownRenderer" }
 
 # ktor common
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
