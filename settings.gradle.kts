@@ -1,7 +1,5 @@
-rootProject.name = "Julie"
-enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
-
 pluginManagement {
+    includeBuild("build-logic")
     repositories {
         google {
             mavenContent {
@@ -28,4 +26,17 @@ dependencyResolutionManagement {
     }
 }
 
+rootProject.name = "Julie"
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
 include(":composeApp")
+
+include(":core:model")
+include(":core:network")
+include(":core:designsystem")
+include(":core:data")
+
+include(":feature:chat")
+include(":feature:modelmanagement")
+include(":core:common")
+include(":core:domain")

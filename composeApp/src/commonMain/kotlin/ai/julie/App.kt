@@ -1,49 +1,17 @@
 package ai.julie
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.Button
+import ai.julie.navigation.JulieNavGraph
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import org.jetbrains.compose.resources.painterResource
+import androidx.compose.runtime.Composable
 import org.jetbrains.compose.ui.tooling.preview.Preview
-
-import julie.composeapp.generated.resources.Res
-import julie.composeapp.generated.resources.compose_multiplatform
-import kotlinx.coroutines.launch
+import org.koin.compose.KoinContext
 
 @Composable
 @Preview
 fun App() {
     MaterialTheme {
-
-        var showContent by remember { mutableStateOf(false) }
-        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            Button(onClick = { showContent = !showContent }) {
-                Text("Click me!")
-            }
-            AnimatedVisibility(showContent) {
-                val greeting = remember { Greeting().greet() }
-                val scope = rememberCoroutineScope()
-                LaunchedEffect(Unit) {
-                    scope.launch {
-                        val greeting1 = Greeting().greeting()
-                        println("Greeting: $greeting1")
-                    }
-                }
-                Column(
-                    Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Compose: $greeting")
-                }
-            }
+        KoinContext {
+            JulieNavGraph()
         }
     }
 }

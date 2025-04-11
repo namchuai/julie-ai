@@ -8,6 +8,9 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.kotlin.parcelize)
+//    alias(libs.plugins.composeHotReload) TODO: adding compose hot reload plugin
 }
 
 kotlin {
@@ -16,7 +19,7 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
+
     listOf(
         iosX64(),
         iosArm64(),
@@ -27,9 +30,9 @@ kotlin {
             isStatic = true
         }
     }
-    
+
     jvm("desktop")
-    
+
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         outputModuleName = "composeApp"
@@ -49,56 +52,46 @@ kotlin {
         }
         binaries.executable()
     }
-    
+
     sourceSets {
         val desktopMain by getting
-        
+
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
 
             implementation(libs.koin.android)
-            implementation(libs.koin.androidx.compose)
-
-            // currently web does not seems to have lifecycle-viewmodel so that we need to duplicate
-            // the dependency for android, iOS and desktop
-            // Could not resolve androidx.lifecycle:lifecycle-viewmodel:2.9.0-alpha05 for :composeApp:wasmJsMain
-            api(libs.koin.core)
-            implementation(libs.koin.compose)
-            implementation(libs.lifecycle.viewmodel)
-            implementation(libs.navigation.compose)
-            implementation(libs.ktor.client.okhttp)
+            implementation(libs.ktor.client.android)
             implementation(libs.kotlinx.coroutines.android)
         }
         commonMain.dependencies {
+            implementation(projects.feature.chat)
+
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material)
+            implementation(compose.material3)
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
+            implementation(libs.markdown.renderer)
+            implementation(libs.navigation.compose)
 
             api(libs.koin.core)
             implementation(libs.ktor.client.core)
+
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.navigation.compose)
+            implementation(libs.koin.compose)
         }
         iosMain.dependencies {
-            api(libs.koin.core)
-            implementation(libs.koin.compose)
-            implementation(libs.lifecycle.viewmodel)
-            implementation(libs.navigation.compose)
             implementation(libs.ktor.client.darwin)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
-
-            api(libs.koin.core)
-            implementation(libs.koin.compose)
-            implementation(libs.lifecycle.viewmodel)
-            implementation(libs.navigation.compose)
         }
     }
 }
