@@ -19,7 +19,7 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
+
     listOf(
         iosX64(),
         iosArm64(),
@@ -30,9 +30,9 @@ kotlin {
             isStatic = true
         }
     }
-    
+
     jvm("desktop")
-    
+
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         outputModuleName = "composeApp"
@@ -52,26 +52,20 @@ kotlin {
         }
         binaries.executable()
     }
-    
+
     sourceSets {
         val desktopMain by getting
-        
+
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
 
             implementation(libs.koin.android)
             implementation(libs.ktor.client.android)
-            implementation(libs.koin.androidx.compose)
             implementation(libs.kotlinx.coroutines.android)
-
-            // currently web does not seems to have lifecycle-viewmodel so that we need to duplicate
-            // the dependency for android, iOS and desktop
-            // Could not resolve androidx.lifecycle:lifecycle-viewmodel:2.9.0-alpha05 for :composeApp:wasmJsMain
-            implementation(libs.lifecycle.viewmodel)
         }
         commonMain.dependencies {
-            // feature goes here
+            implementation(projects.feature.chat)
 
             implementation(compose.runtime)
             implementation(compose.foundation)
@@ -83,6 +77,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.markdown.renderer)
+            implementation(libs.navigation.compose)
 
             api(libs.koin.core)
             implementation(libs.ktor.client.core)
@@ -93,13 +88,10 @@ kotlin {
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
-            implementation(libs.lifecycle.viewmodel)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
-
-            implementation(libs.lifecycle.viewmodel)
         }
     }
 }

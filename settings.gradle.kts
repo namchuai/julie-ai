@@ -37,4 +37,6 @@ include(":core:designsystem")
 include(":core:data")
 
 include(":feature:chat")
-include(":feature:model-management")
+include(":feature:modelmanagement")
+include(":core:common")
+include(":core:domain")
