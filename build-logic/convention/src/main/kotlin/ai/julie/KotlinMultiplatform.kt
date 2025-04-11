@@ -20,7 +20,7 @@ internal fun Project.configureKotlinMultiplatform(
 
     wasmJs { browser() }
 
-    listOf(iosArm64(), iosSimulatorArm64())
+    listOf(iosX64(), iosArm64(), iosSimulatorArm64())
 
     applyDefaultHierarchyTemplate()
 
