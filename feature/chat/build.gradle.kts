@@ -6,10 +6,10 @@ plugins {
 kotlin {
     sourceSets {
         commonMain.dependencies {
+            api(projects.core.designsystem)
             api(projects.core.common)
             api(projects.core.domain)
             implementation(projects.core.model)
-            implementation(projects.core.designsystem)
 
             implementation(libs.navigation.compose)
             implementation(libs.androidx.lifecycle.viewmodel)

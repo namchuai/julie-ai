@@ -1,12 +1,12 @@
 package ai.julie.navigation
 
 import ai.julie.feature.chat.navigation.Chat
+import ai.julie.feature.chat.navigation.chatGraph
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.NavHost
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import ai.julie.feature.chat.navigation.chatGraph
 
 @Composable
 fun JulieNavGraph(
