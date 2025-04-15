@@ -131,10 +131,22 @@ compose.desktop {
     application {
         mainClass = "ai.julie.MainKt"
 
+        // Update java.library.path to point to the composeApp processedResources directory
+        jvmArgs += "-Djava.library.path=${layout.buildDirectory.dir("processedResources/desktop/main").get().asFile.absolutePath}"
+
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "ai.julie"
             packageVersion = "1.0.0"
+
+            // Include the native library from the nativelib module's build output
+            modules("java.instrument") // Example existing module, keep others if present
+            includeAllModules = true // Ensure dependent modules are included
         }
     }
+}
+
+// Ensure native lib is copied before desktop resources are processed for packaging/running
+tasks.named("desktopProcessResources") {
+    dependsOn(project(":core:nativelib").tasks.named("copyNativeLib"))
 }

@@ -19,7 +19,7 @@ fun ChatScreen() {
     Column(
         modifier = Modifier.fillMaxSize(),
     ) {
-        Text("Chat screen")
+        Text(NativeLibWrapper.callNativeString("Hello from Kotlin!"))
         Button(
             onClick = { /* TODO */ },
         ) {
