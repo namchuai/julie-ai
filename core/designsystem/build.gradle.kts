@@ -10,6 +10,7 @@ kotlin {
             api(projects.core.common)
             implementation(libs.coil.compose)
             implementation(libs.zoomimage.compose.coil)
+            implementation(libs.nomanr.composables)
         }
     }
 }
