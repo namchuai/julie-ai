@@ -107,7 +107,7 @@ data class SystemMessage(
  */
 data class UserMessage(
     /** Required. The contents of the user message (can be text or mixed content parts). */
-    val content: MessageContent,
+    val content: String, // TODO: add support for List
     /** Optional. An optional name for the participant. */
     override val name: String? = null
 ) : Message(role = "user", name = name)
