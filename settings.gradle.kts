@@ -36,7 +36,7 @@ include(":core:model")
 include(":core:network")
 include(":core:designsystem")
 include(":core:data")
+include(":core:nativelib")
 
 include(":feature:chat")
 include(":feature:modelmanagement")
-

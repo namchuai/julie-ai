@@ -11,17 +11,18 @@ import androidx.compose.ui.Modifier
 fun ChatScreenRoute(
     viewModel: ChatViewModel,
 ) {
-    ChatScreen()
+    ChatScreen(viewModel::onSendClick)
 }
 
 @Composable
-fun ChatScreen() {
+fun ChatScreen(
+    onSendClick: () -> Unit,
+) {
     Column(
         modifier = Modifier.fillMaxSize(),
     ) {
-        Text("Chat screen")
         Button(
-            onClick = { /* TODO */ },
+            onClick = onSendClick,
         ) {
             Text("Send")
         }
