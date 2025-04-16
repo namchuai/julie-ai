@@ -7,7 +7,7 @@ namespace {
 
 // Implementation of the core string processing function
 std::string core_process_string(const std::string& input_str) {
-    return "That is '" + input_str + "' from C++ Core 123";
+    return "That is '" + input_str + "' from C++ Core";
 }
 
 // Implementation of the function to get the global string
