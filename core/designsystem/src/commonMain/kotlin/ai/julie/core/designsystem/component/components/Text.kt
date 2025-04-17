@@ -1,5 +1,8 @@
 package ai.julie.core.designsystem.component.components
 
+import ai.julie.core.designsystem.component.LocalContentColor
+import ai.julie.core.designsystem.component.LocalTextStyle
+import ai.julie.core.designsystem.component.LocalTypography
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -22,9 +25,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import ai.julie.core.designsystem.component.LocalContentColor
-import ai.julie.core.designsystem.component.LocalTextStyle
-import ai.julie.core.designsystem.component.LocalTypography
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable

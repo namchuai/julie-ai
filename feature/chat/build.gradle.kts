@@ -11,6 +11,7 @@ kotlin {
             api(projects.core.domain)
             implementation(projects.core.logging)
             implementation(projects.core.model)
+            implementation(projects.core.storage)
 
             implementation(libs.navigation.compose)
             implementation(libs.androidx.lifecycle.viewmodel)

@@ -1,5 +1,6 @@
 package ai.julie.core.designsystem.component.foundation
 
+import ai.julie.core.designsystem.component.LocalContentColor
 import androidx.compose.foundation.IndicationNodeFactory
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.material.ripple.RippleAlpha
@@ -18,7 +19,6 @@ import androidx.compose.ui.node.ObserverModifierNode
 import androidx.compose.ui.node.currentValueOf
 import androidx.compose.ui.node.observeReads
 import androidx.compose.ui.unit.Dp
-import ai.julie.core.designsystem.component.LocalContentColor
 
 @Stable
 fun ripple(

@@ -1,5 +1,8 @@
 package ai.julie.core.designsystem.component.components
 
+import ai.julie.core.designsystem.component.AppTheme
+import ai.julie.core.designsystem.component.LocalContentColor
+import ai.julie.core.designsystem.component.foundation.ButtonElevation
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -26,9 +29,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import ai.julie.core.designsystem.component.AppTheme
-import ai.julie.core.designsystem.component.LocalContentColor
-import ai.julie.core.designsystem.component.foundation.ButtonElevation
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable

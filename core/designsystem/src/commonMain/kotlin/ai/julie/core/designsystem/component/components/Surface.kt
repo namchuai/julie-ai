@@ -1,5 +1,9 @@
 package ai.julie.core.designsystem.component.components
 
+import ai.julie.core.designsystem.component.AppTheme
+import ai.julie.core.designsystem.component.LocalContentColor
+import ai.julie.core.designsystem.component.contentColorFor
+import ai.julie.core.designsystem.component.foundation.ripple
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -23,10 +27,6 @@ import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import ai.julie.core.designsystem.component.AppTheme
-import ai.julie.core.designsystem.component.LocalContentColor
-import ai.julie.core.designsystem.component.contentColorFor
-import ai.julie.core.designsystem.component.foundation.ripple
 
 @Composable
 @NonRestartableComposable

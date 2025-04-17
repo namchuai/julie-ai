@@ -1,8 +1,8 @@
 package ai.julie.core.network.model.createchatcompletion.response
 
-import ai.julie.core.model.chatcompletionresponse.ChatCompletion as ModelChatCompletion
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import ai.julie.core.model.chatcompletionresponse.ChatCompletion as ModelChatCompletion
 
 @Serializable
 data class ChatCompletion(

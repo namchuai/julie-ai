@@ -2,7 +2,6 @@ package ai.julie.core.network.model.createchatcompletion.response
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import ai.julie.core.model.chatcompletionresponse.Logprobs as ModelLogprobs
 
 @Serializable
 data class Logprobs(

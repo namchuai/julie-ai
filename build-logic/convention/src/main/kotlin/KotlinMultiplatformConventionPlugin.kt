@@ -1,11 +1,11 @@
+import ai.julie.configureKotlinAndroid
+import ai.julie.configureKotlinMultiplatform
 import ai.julie.libs
 import com.android.build.api.dsl.LibraryExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-import ai.julie.configureKotlinAndroid
-import ai.julie.configureKotlinMultiplatform
 
 class KotlinMultiplatformConventionPlugin : Plugin<Project> {
 

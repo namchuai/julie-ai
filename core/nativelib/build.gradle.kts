@@ -1,8 +1,5 @@
 import java.nio.file.Files
 import java.nio.file.Paths
-import org.gradle.api.tasks.Exec // Import Exec task type
-import org.gradle.api.tasks.Copy // Import Copy task type
-import org.gradle.api.tasks.Delete // Import Delete task type
 
 // Apply the base plugin to get standard lifecycle tasks like 'build'
 apply(plugin = "base")
