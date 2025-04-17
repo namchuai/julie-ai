@@ -8,3 +8,11 @@ compose.resources {
     packageOfResClass = "ai.julie.resources"
     generateResClass = always
 }
+
+kotlin {
+    sourceSets {
+        commonMain.dependencies {
+            implementation(compose.components.resources)
+        }
+    }
+}

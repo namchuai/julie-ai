@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import julie.feature.chat.generated.resources.Res
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun ChatScreenRoute(
@@ -18,6 +20,9 @@ fun ChatScreenRoute(
 fun ChatScreen(
     onSendClick: () -> Unit,
 ) {
+    Text(
+        text = stringResource(Res.string.new_chat)
+    )
     Column(
         modifier = Modifier.fillMaxSize(),
     ) {
