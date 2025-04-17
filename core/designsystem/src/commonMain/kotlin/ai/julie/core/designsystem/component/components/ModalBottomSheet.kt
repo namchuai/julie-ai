@@ -1,5 +1,6 @@
 package ai.julie.core.designsystem.component.components
 
+import ai.julie.core.designsystem.component.AppTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import com.nomanr.composables.bottomsheet.BasicModalBottomSheet
 import com.nomanr.composables.bottomsheet.SheetState
 import com.nomanr.composables.bottomsheet.rememberModalBottomSheetState
-import ai.julie.core.designsystem.component.AppTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable

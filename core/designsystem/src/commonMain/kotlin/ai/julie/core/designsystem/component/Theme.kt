@@ -1,5 +1,6 @@
 package ai.julie.core.designsystem.component
 
+import ai.julie.core.designsystem.component.foundation.ripple
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
@@ -9,7 +10,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
-import ai.julie.core.designsystem.component.foundation.ripple
 
 object AppTheme {
     val colors: Colors

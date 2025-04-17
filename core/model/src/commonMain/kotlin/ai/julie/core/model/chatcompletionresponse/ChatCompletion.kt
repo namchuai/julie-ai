@@ -2,7 +2,6 @@ package ai.julie.core.model.chatcompletionresponse
 
 // Note: Reusing MessageContent definitions from the request model for content parts
 // Might need adjustments if response content structure differs significantly.
-import ai.julie.core.model.createchatcompletion.MessageContent
 
 /**
  * Represents the log probability information for a token.

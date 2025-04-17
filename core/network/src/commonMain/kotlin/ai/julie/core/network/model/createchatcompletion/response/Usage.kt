@@ -2,9 +2,9 @@ package ai.julie.core.network.model.createchatcompletion.response
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import ai.julie.core.model.chatcompletionresponse.Usage as ModelUsage
 import ai.julie.core.model.chatcompletionresponse.CompletionTokensDetails as ModelCompletionTokensDetails
 import ai.julie.core.model.chatcompletionresponse.PromptTokensDetails as ModelPromptTokensDetails
+import ai.julie.core.model.chatcompletionresponse.Usage as ModelUsage
 
 @Serializable
 data class Usage(
