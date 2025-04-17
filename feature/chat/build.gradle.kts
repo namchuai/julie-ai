@@ -9,6 +9,7 @@ kotlin {
             api(projects.core.designsystem)
             api(projects.core.common)
             api(projects.core.domain)
+            implementation(projects.core.logging)
             implementation(projects.core.model)
 
             implementation(libs.navigation.compose)

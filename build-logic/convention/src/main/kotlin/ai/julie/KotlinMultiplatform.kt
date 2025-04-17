@@ -30,7 +30,6 @@ internal fun Project.configureKotlinMultiplatform(
                 implementation(libs.findLibrary("kotlinx.coroutines.core").get())
                 implementation(libs.findLibrary("markdown.renderer").get())
                 api(libs.findLibrary("koin.core").get())
-//                implementation(libs.findLibrary("kermit").get()) // TODO: add this logging library
             }
 
             androidMain {

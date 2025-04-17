@@ -16,6 +16,7 @@ kotlin {
         }
         commonMain.dependencies {
             implementation(projects.core.model)
+            implementation(projects.core.logging)
 
             implementation(libs.kotlinx.serialization.json)
             api(libs.bundles.ktor.common)
@@ -25,4 +26,3 @@ kotlin {
         }
     }
 }
-
