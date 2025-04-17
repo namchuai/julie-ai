@@ -12,5 +12,4 @@ plugins {
 //    alias(libs.plugins.composeHotReload) apply false // TODO: try to use later on
     alias(libs.plugins.modulegraph)
     alias(libs.plugins.lumo) apply false
-    alias(libs.plugins.kotlinAndroid) apply false
 }
