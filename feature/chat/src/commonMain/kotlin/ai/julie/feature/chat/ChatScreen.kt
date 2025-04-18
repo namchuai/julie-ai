@@ -1,46 +1,52 @@
 package ai.julie.feature.chat
 
-import ai.julie.core.designsystem.component.components.Button
-import ai.julie.core.designsystem.component.components.Text
-import ai.julie.resources.Res
-import ai.julie.resources.new_chat
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import org.jetbrains.compose.resources.stringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun ChatScreenRoute(
     viewModel: ChatViewModel,
 ) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+
     ChatScreen(
-        viewModel::onSendClick,
-        viewModel::onTestStorageClick,
+        message = state.message,
+        messages = state.messages,
+        onSendClick = viewModel::onSendClick,
+        onNewChatClick = viewModel::onNewChatClick,
+        onMessageUpdate = viewModel::onMessageUpdate,
     )
 }
 
 @Composable
 fun ChatScreen(
+    message: String,
+    messages: List<MessageItem>,
     onSendClick: () -> Unit,
-    onTestDatabase: () -> Unit,
+    onNewChatClick: () -> Unit,
+    onMessageUpdate: (String) -> Unit,
 ) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
     ) {
-        Text(
-            text = stringResource(Res.string.new_chat)
+        ChatMessageList(
+            messages = messages,
+            modifier = Modifier.weight(1f)
         )
-        Button(
-            onClick = onSendClick,
-        ) {
-            Text("Send")
-        }
 
-        Button(
-            onClick = onTestDatabase
-        ) {
-            Text("Test database")
-        }
+        NewChatButton(
+            onClick = onNewChatClick,
+        )
+
+        ChatInputSection(
+            message = message,
+            onMessageUpdate = onMessageUpdate,
+            onSendMessage = onSendClick
+        )
     }
 }
