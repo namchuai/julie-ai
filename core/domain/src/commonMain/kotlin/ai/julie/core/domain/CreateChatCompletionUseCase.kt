@@ -1,23 +1,23 @@
 package ai.julie.core.domain
 
 import ai.julie.core.data.OpenAiRepository
-import ai.julie.core.model.chatcompletionresponse.ChatCompletion
-import ai.julie.core.model.createchatcompletion.CreateChatCompletionRequestBody
-import ai.julie.core.model.createchatcompletion.UserMessage
+import ai.julie.core.model.chatcompletion.ChatCompletion
+import ai.julie.core.model.chatcompletion.create.CreateChatCompletion
+import ai.julie.core.model.chatcompletion.create.message.content.MessageContentRequest
+import ai.julie.core.model.chatcompletion.create.message.UserMessageRequest
 
 class CreateChatCompletionUseCase(
     private val openAiRepository: OpenAiRepository,
 ) {
     suspend operator fun invoke(): ChatCompletion {
-        // TODO: fetching the messages
-        val test = CreateChatCompletionRequestBody(
+        val test = CreateChatCompletion(
             model = "gpt-4.1",
             messages = listOf(
-                UserMessage(
-                    content = "Hello, how are you?",
+                UserMessageRequest(
+                    content = MessageContentRequest.Value("Hello, how are you?")
                 ),
-            ),
+            )
         )
-        return openAiRepository.createChatCompletionNonStream(test)
+        return openAiRepository.createChatCompletion(test)
     }
 }

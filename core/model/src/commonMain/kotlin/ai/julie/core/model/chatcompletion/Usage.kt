@@ -1,10 +1,7 @@
-package ai.julie.core.network.model.createchatcompletion.response
+package ai.julie.core.model.chatcompletion
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import ai.julie.core.model.chatcompletionresponse.CompletionTokensDetails as ModelCompletionTokensDetails
-import ai.julie.core.model.chatcompletionresponse.PromptTokensDetails as ModelPromptTokensDetails
-import ai.julie.core.model.chatcompletionresponse.Usage as ModelUsage
 
 @Serializable
 data class Usage(
@@ -75,25 +72,3 @@ data class PromptTokensDetails(
      */
     @SerialName("cached_tokens") val cachedTokens: Int,
 )
-
-fun Usage.toUsage() = ModelUsage(
-    completionTokens = this.completionTokens,
-    promptTokens = this.promptTokens,
-    totalTokens = this.totalTokens,
-    completionTokensDetails = this.completionTokensDetails.toCompletionTokensDetails(),
-    promptTokensDetails = this.promptTokensDetails.toPromptTokensDetails()
-)
-
-fun CompletionTokensDetails.toCompletionTokensDetails() =
-    ModelCompletionTokensDetails(
-        acceptedPredictionTokens = this.acceptedPredictionTokens,
-        audioTokens = this.audioTokens,
-        reasoningTokens = this.reasoningTokens,
-        rejectedPredictionTokens = this.rejectedPredictionTokens
-    )
-
-fun PromptTokensDetails.toPromptTokensDetails() =
-    ModelPromptTokensDetails(
-        audioTokens = this.audioTokens,
-        cachedTokens = this.cachedTokens
-    )

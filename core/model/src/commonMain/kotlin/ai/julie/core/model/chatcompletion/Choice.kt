@@ -1,8 +1,7 @@
-package ai.julie.core.network.model.createchatcompletion.response
+package ai.julie.core.model.chatcompletion
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import ai.julie.core.model.chatcompletionresponse.Choice as ModelChoice
 
 @Serializable
 data class Choice(
@@ -30,11 +29,4 @@ data class Choice(
      * Log probability information for the choice.
      */
     @SerialName("logprobs") val logprobs: Logprobs? = null,
-)
-
-fun Choice.toChoice() = ModelChoice(
-    finishReason = this.finishReason,
-    index = this.index,
-    message = this.message.toResponseMessage(),
-//    logprobs = this.logprobs?.toLogprobs() // TODO: NamH
 )

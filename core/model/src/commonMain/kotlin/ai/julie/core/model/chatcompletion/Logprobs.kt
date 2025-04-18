@@ -1,4 +1,4 @@
-package ai.julie.core.network.model.createchatcompletion.response
+package ai.julie.core.model.chatcompletion
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -55,9 +55,3 @@ data class LogprobsRefusal(
     // top_logprobs
     // bytes
 )
-
-// TODO: NamH
-//fun Logprobs.toLogprobs() = ModelLogprobs(
-//    content = this.content, // Assuming direct mapping works
-//    refusal = this.refusal // Assuming direct mapping works
-//)

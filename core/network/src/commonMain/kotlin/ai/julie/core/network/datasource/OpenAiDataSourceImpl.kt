@@ -1,7 +1,7 @@
 package ai.julie.core.network.datasource
 
-import ai.julie.core.network.model.createchatcompletion.response.ChatCompletion
-import ai.julie.core.network.model.request.CreateChatCompletionRequest
+import ai.julie.core.model.chatcompletion.ChatCompletion
+import ai.julie.core.model.chatcompletion.create.CreateChatCompletion
 import ai.julie.logging.Logger
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -14,7 +14,7 @@ class OpenAiDataSourceImpl(
     private val openAiHttpClient: HttpClient,
 ) : OpenAiDataSource {
 
-    override suspend fun createChatCompletion(request: CreateChatCompletionRequest): ChatCompletion {
+    override suspend fun createChatCompletion(request: CreateChatCompletion): ChatCompletion {
         val response = openAiHttpClient.post("v1/chat/completions") {
             contentType(ContentType.Application.Json)
             setBody(request)

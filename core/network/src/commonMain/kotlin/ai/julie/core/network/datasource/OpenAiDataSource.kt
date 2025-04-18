@@ -1,9 +1,9 @@
 package ai.julie.core.network.datasource
 
-import ai.julie.core.network.model.createchatcompletion.response.ChatCompletion
-import ai.julie.core.network.model.request.CreateChatCompletionRequest
+import ai.julie.core.model.chatcompletion.ChatCompletion
+import ai.julie.core.model.chatcompletion.create.CreateChatCompletion
 
 interface OpenAiDataSource {
 
-    suspend fun createChatCompletion(request: CreateChatCompletionRequest): ChatCompletion
+    suspend fun createChatCompletion(request: CreateChatCompletion): ChatCompletion
 }
