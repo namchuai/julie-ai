@@ -3,8 +3,8 @@ package ai.julie.core.domain
 import ai.julie.core.data.OpenAiRepository
 import ai.julie.core.model.chatcompletion.ChatCompletion
 import ai.julie.core.model.chatcompletion.create.CreateChatCompletion
-import ai.julie.core.model.chatcompletion.create.message.content.MessageContentRequest
 import ai.julie.core.model.chatcompletion.create.message.UserMessageRequest
+import ai.julie.core.model.chatcompletion.create.message.content.MessageContentRequest
 
 class CreateChatCompletionUseCase(
     private val openAiRepository: OpenAiRepository,
