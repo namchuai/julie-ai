@@ -1,6 +1,5 @@
-package ai.julie.core.network.model.createchatcompletion.response
+package ai.julie.core.model.chatcompletion
 
-import ai.julie.core.model.chatcompletionresponse.ResponseMessage
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -156,14 +155,4 @@ data class UrlCitation(
      * The URL of the web resource.
      */
     @SerialName("url") val url: String,
-)
-
-fun Message.toResponseMessage() = ResponseMessage(
-    role = this.role,
-    content = this.content,
-    refusal = this.refusal,
-//    annotations = this.annotations, // TODO: NamH
-//    audio = this.audio,
-    toolCalls = null, //this.toolCalls,
-    functionCall = null, //this.functionCall,
 )

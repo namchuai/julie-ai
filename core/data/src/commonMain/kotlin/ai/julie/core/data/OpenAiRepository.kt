@@ -1,8 +1,8 @@
 package ai.julie.core.data
 
-import ai.julie.core.model.chatcompletionresponse.ChatCompletion
-import ai.julie.core.model.createchatcompletion.CreateChatCompletionRequestBody
+import ai.julie.core.model.chatcompletion.ChatCompletion
+import ai.julie.core.model.chatcompletion.create.CreateChatCompletion
 
 interface OpenAiRepository {
-    suspend fun createChatCompletionNonStream(input: CreateChatCompletionRequestBody): ChatCompletion
+    suspend fun createChatCompletion(input: CreateChatCompletion): ChatCompletion
 }

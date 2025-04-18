@@ -1,8 +1,7 @@
-package ai.julie.core.network.model.createchatcompletion.response
+package ai.julie.core.model.chatcompletion
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import ai.julie.core.model.chatcompletionresponse.ChatCompletion as ModelChatCompletion
 
 @Serializable
 data class ChatCompletion(
@@ -49,15 +48,4 @@ data class ChatCompletion(
      * Usage statistics for the completion request.
      */
     @SerialName("usage") val usage: Usage,
-)
-
-fun ChatCompletion.toChatCompletion() = ModelChatCompletion(
-    id = this.id,
-    choices = this.choices.map { it.toChoice() },
-    created = this.created,
-    model = this.model,
-    objectType = this.objectType,
-    serviceTier = this.serviceTier,
-    systemFingerprint = this.systemFingerprint,
-    usage = this.usage?.toUsage(),
 )
