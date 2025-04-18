@@ -3,6 +3,7 @@ package ai.julie
 import ai.julie.di.appModule
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import org.jetbrains.compose.reload.DevelopmentEntryPoint
 import org.koin.core.context.startKoin
 
 fun main() {
@@ -14,7 +15,9 @@ fun main() {
             onCloseRequest = ::exitApplication,
             title = "Julie",
         ) {
-            App()
+            DevelopmentEntryPoint {
+                App()
+            }
         }
     }
 }
