@@ -1,4 +1,6 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.compose.reload.ComposeHotRun
+import org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
@@ -10,7 +12,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.kotlin.parcelize)
-//    alias(libs.plugins.composeHotReload) TODO: adding compose hot reload plugin
+    alias(libs.plugins.composeHotReload)
 }
 
 kotlin {
@@ -131,7 +133,9 @@ compose.desktop {
         mainClass = "ai.julie.MainKt"
 
         // Update java.library.path to point to the composeApp processedResources directory
-        jvmArgs += "-Djava.library.path=${layout.buildDirectory.dir("processedResources/desktop/main").get().asFile.absolutePath}"
+        jvmArgs += "-Djava.library.path=${
+            layout.buildDirectory.dir("processedResources/desktop/main").get().asFile.absolutePath
+        }"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
@@ -148,4 +152,12 @@ compose.desktop {
 // Ensure native lib is copied before desktop resources are processed for packaging/running
 tasks.named("desktopProcessResources") {
     dependsOn(project(":core:nativelib").tasks.named("copyNativeLib"))
+}
+
+composeCompiler {
+    featureFlags.add(ComposeFeatureFlag.OptimizeNonSkippingGroups)
+}
+
+tasks.register<ComposeHotRun>("runHot") {
+    mainClass.set("ai.julie.MainKt")
 }

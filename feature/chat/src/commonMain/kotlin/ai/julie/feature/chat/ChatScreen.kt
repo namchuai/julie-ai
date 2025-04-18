@@ -25,12 +25,12 @@ fun ChatScreen(
     onSendClick: () -> Unit,
     onTestDatabase: () -> Unit,
 ) {
-    Text(
-        text = stringResource(Res.string.new_chat)
-    )
     Column(
         modifier = Modifier.fillMaxSize(),
     ) {
+        Text(
+            text = stringResource(Res.string.new_chat)
+        )
         Button(
             onClick = onSendClick,
         ) {
