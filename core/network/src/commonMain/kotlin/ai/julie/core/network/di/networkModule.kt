@@ -1,6 +1,6 @@
 package ai.julie.core.network.di
 
-import ai.julie.BuildConfig
+import ai.julie.core.network.config.openAiApiKey
 import ai.julie.core.network.datasource.OpenAiDataSource
 import ai.julie.core.network.datasource.OpenAiDataSourceImpl
 import io.ktor.client.HttpClient
@@ -34,6 +34,17 @@ val networkModule = module {
         }
     }
 
+    single<HttpClient> {
+        HttpClient {
+            install(ContentNegotiation) {
+                json(get())
+            }
+            install(Logging) {
+                level = LogLevel.INFO
+            }
+        }
+    }
+
     single(named("OpenAiHttpClient")) {
         HttpClient {
             install(ContentNegotiation) {
@@ -49,7 +60,7 @@ val networkModule = module {
                     host = "api.openai.com"
                 }
                 header(HttpHeaders.ContentType, ContentType.Application.Json)
-                header(HttpHeaders.Authorization, "Bearer ${BuildConfig.OPENAI_API_KEY}")
+                header(HttpHeaders.Authorization, "Bearer $openAiApiKey")
             }
         }
     }

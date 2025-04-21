@@ -1,0 +1,3 @@
+[submodule "core/llamabinding/llamacpp/src/llama.cpp"]
+	path = core/llamabinding/llamacpp/src/llama.cpp
+	url = https://github.com/ggerganov/llama.cpp.git

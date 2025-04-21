@@ -18,9 +18,11 @@ internal fun Project.configureKotlinMultiplatform(
 
     jvm("desktop")
 
-    wasmJs { browser() }
-
-    listOf(iosX64(), iosArm64(), iosSimulatorArm64())
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64()
+    )
 
     applyDefaultHierarchyTemplate()
 
@@ -31,17 +33,18 @@ internal fun Project.configureKotlinMultiplatform(
                 implementation(libs.findLibrary("markdown.renderer").get())
                 api(libs.findLibrary("koin.core").get())
             }
+        }
 
-            androidMain {
-                dependencies {
-                    implementation(libs.findLibrary("koin.android").get())
-                    implementation(libs.findLibrary("kotlinx.coroutines.android").get())
-                }
+        androidMain {
+            dependencies {
+                implementation(libs.findLibrary("koin.android").get())
+                implementation(libs.findLibrary("kotlinx.coroutines.android").get())
+            }
+        }
 
-                val desktopMain = getByName("desktopMain")
-                desktopMain.dependencies {
-                    implementation(libs.findLibrary("kotlinx.coroutines.swing").get())
-                }
+        getByName("desktopMain") {
+            dependencies {
+                implementation(libs.findLibrary("kotlinx.coroutines.swing").get())
             }
         }
     }

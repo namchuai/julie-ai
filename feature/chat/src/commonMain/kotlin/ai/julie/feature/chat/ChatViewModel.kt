@@ -1,6 +1,7 @@
 package ai.julie.feature.chat
 
 import ai.julie.core.domain.CreateChatCompletionUseCase
+import ai.julie.llamabinding.triggerTestLlamaLoad
 import ai.julie.logging.Logger
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -58,6 +59,10 @@ class ChatViewModel(
         }
     }
 
+    fun onTestLlamaLoadClick() {
+        triggerTestLlamaLoad()
+    }
+
     fun onNewChatClicked() {
     }
 
@@ -65,5 +70,9 @@ class ChatViewModel(
     }
 
     fun onMessageUpdate(messageInput: String) {
+    }
+
+    fun loadChats() {
+        // Placeholder - implement if needed
     }
 }

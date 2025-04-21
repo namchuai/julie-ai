@@ -17,13 +17,14 @@ internal data object ChatScreen
 
 fun NavGraphBuilder.chatGraph(
     navController: NavHostController,
+    onModelMarketClick: () -> Unit,
 ) {
     navigation<Chat>(
         startDestination = ChatScreen,
     ) {
         composable<ChatScreen> {
             val viewModel = koinViewModel<ChatViewModel>()
-            ChatScreenRoute(viewModel)
+            ChatScreenRoute(viewModel, onModelMarketClick)
         }
     }
 }

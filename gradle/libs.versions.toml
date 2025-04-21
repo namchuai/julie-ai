@@ -5,7 +5,7 @@ android-minSdk = "24"
 android-targetSdk = "35"
 androidx-activityCompose = "1.10.1"
 androidx-appcompat = "1.7.0"
-androidx-core-ktx = "1.15.0"
+androidx-core-ktx = "1.16.0"
 androidx-espresso-core = "3.6.1"
 androidx-lifecycle = "2.8.4"
 androidx-material = "1.12.0"
@@ -17,7 +17,7 @@ kotlinx-coroutines = "1.10.1"
 koin = "4.0.2"
 navigationCompose = "2.8.0-alpha12"
 ktor = "3.1.2"
-coroutines = "1.9.0"
+coroutines = "1.10.1"
 kotlinx_serialization_json = "1.8.0"
 buildConfig = "5.5.4"
 compose-hot-reload = "1.0.0-dev.34.1"
@@ -27,9 +27,10 @@ coil = "3.0.4"
 zoomimageComposeCoil = "1.1.0"
 lumoRef = "1.2.2"
 composableRef = "1.1.0"
-kermitRef = "2.0.4"
+kermitRef = "2.0.5"
 sqlDelightRef = "2.0.2"
 sqldelightJvmDriverRef = "2.0.2"
+okioRef = "3.11.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -45,6 +46,7 @@ androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", nam
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
 kermit = { module = "co.touchlab:kermit", version.ref = "kermitRef" }
+okio = { module = "com.squareup.okio:okio", version.ref = "okioRef" }
 
 # koin
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }

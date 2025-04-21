@@ -7,6 +7,7 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.core.model)
             api(projects.core.data)
+            api(libs.okio)
         }
     }
 }
