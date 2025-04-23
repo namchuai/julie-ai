@@ -10,7 +10,7 @@ val dataModule = module {
 
     single<OpenAiRepository> {
         OpenAiRepositoryImpl(
-            dataSource = get(),
+            httpClientProvider = get(),
         )
     }
 }

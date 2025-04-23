@@ -6,7 +6,8 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.model)
-            api(projects.core.network)
+            implementation(projects.core.network)
+            implementation(projects.core.logging)
         }
     }
 }
