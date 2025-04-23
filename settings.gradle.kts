@@ -1,3 +1,5 @@
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
 pluginManagement {
     includeBuild("build-logic")
     repositories {
@@ -18,6 +20,24 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.10.0"
 }
 
+include(
+    ":composeApp",
+    ":core:common",
+    ":core:domain",
+    ":core:model",
+    ":core:network",
+    ":core:designsystem",
+    ":core:data",
+    ":core:logging",
+    ":core:storage",
+    ":core:llamabinding",
+    ":core:llamabinding:llamacpp",
+    ":feature:chat",
+    ":feature:modelmanagement",
+    ":feature:modelmarket",
+)
+rootProject.name = "Julie"
+
 dependencyResolutionManagement {
     repositories {
         google {
@@ -31,20 +51,3 @@ dependencyResolutionManagement {
         maven("https://packages.jetbrains.team/maven/p/firework/dev")
     }
 }
-
-rootProject.name = "Julie"
-enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
-
-include(":composeApp")
-include(":core:common")
-include(":core:domain")
-include(":core:model")
-include(":core:network")
-include(":core:designsystem")
-include(":core:data")
-include(":core:nativelib")
-include(":core:logging")
-include(":core:storage")
-
-include(":feature:chat")
-include(":feature:modelmanagement")
