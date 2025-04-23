@@ -1,78 +1,68 @@
 package ai.julie.feature.chat
 
 import ai.julie.core.domain.CreateChatCompletionUseCase
-import ai.julie.llamabinding.triggerTestLlamaLoad
-import ai.julie.logging.Logger
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.aallam.openai.api.chat.ChatMessage
+import com.aallam.openai.api.core.Role
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ChatViewModel(
     private val createChatCompletionUseCase: CreateChatCompletionUseCase,
 ) : ViewModel() {
 
-    private var _uiState = MutableStateFlow(
-        ChatModel(
-            messages = listOf(
-                MessageItem(
-                    id = "1",
-                    content = "Hello, how can I assist you today?",
-                    isFromUser = false,
-                ),
-                MessageItem(
-                    id = "2",
-                    content = "I am looking for information on Kotlin Multiplatform.",
-                    isFromUser = true,
-                ),
-            )
-        )
-    )
+    private var _uiState = MutableStateFlow(ChatModel())
     val uiState: StateFlow<ChatModel> = _uiState
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = ChatModel(
-                messages = listOf(
-                    MessageItem(
-                        id = "1",
-                        content = "Hello, how can I assist you today?",
-                        isFromUser = false,
-                    ),
-                    MessageItem(
-                        id = "2",
-                        content = "I am looking for information on Kotlin Multiplatform.",
-                        isFromUser = true,
-                    ),
-                )
-            )
+            initialValue = ChatModel()
         )
 
-
     fun onSendClick() {
-        viewModelScope.launch {
-            val result = createChatCompletionUseCase()
-            Logger.i { result.toString() }
+        if (_uiState.value.message.isBlank()) return
+        _uiState.update {
+            it.copy(
+                message = "",
+                messages = it.messages + MessageItem(
+                    id = it.messages.size.toString(),
+                    content = it.message,
+                    isFromUser = true,
+                )
+            )
         }
-    }
 
-    fun onTestLlamaLoadClick() {
-        triggerTestLlamaLoad()
-    }
-
-    fun onNewChatClicked() {
+        viewModelScope.launch {
+            val chatCompletion =
+                createChatCompletionUseCase(messages = _uiState.value.messages.map {
+                    ChatMessage(
+                        role = if (it.isFromUser) Role.User else Role.Assistant,
+                        content = it.content
+                    )
+                })
+            _uiState.update {
+                it.copy(
+                    messages = it.messages + MessageItem(
+                        id = it.messages.size.toString(),
+                        content = chatCompletion.choices.first().message.content ?: "",
+                        isFromUser = false,
+                    )
+                )
+            }
+        }
     }
 
     fun onNewChatClick() {
     }
 
     fun onMessageUpdate(messageInput: String) {
-    }
-
-    fun loadChats() {
-        // Placeholder - implement if needed
+        _uiState.update {
+            it.copy(message = messageInput)
+        }
     }
 }
