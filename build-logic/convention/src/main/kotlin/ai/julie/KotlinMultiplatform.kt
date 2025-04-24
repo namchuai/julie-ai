@@ -47,5 +47,11 @@ internal fun Project.configureKotlinMultiplatform(
                 implementation(libs.findLibrary("kotlinx.coroutines.swing").get())
             }
         }
+
+        // Apply opt-in universally to ensure consistency across the hierarchy
+        all {
+            languageSettings.optIn("kotlin.uuid.ExperimentalUuidApi")
+            languageSettings.optIn("com.aallam.openai.api.BetaOpenAI")
+        }
     }
 }

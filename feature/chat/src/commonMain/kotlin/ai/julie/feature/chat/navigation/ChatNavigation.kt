@@ -24,7 +24,7 @@ fun NavGraphBuilder.chatGraph(
     ) {
         composable<ChatScreen> {
             val viewModel = koinViewModel<ChatViewModel>()
-            ChatScreenRoute(viewModel, onModelMarketClick)
+            ChatScreenRoute(viewModel)
         }
     }
 }

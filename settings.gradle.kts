@@ -35,6 +35,8 @@ include(
     ":feature:chat",
     ":feature:modelmanagement",
     ":feature:modelmarket",
+    ":feature:modelconfig",
+    ":feature:thread",
 )
 rootProject.name = "Julie"
 

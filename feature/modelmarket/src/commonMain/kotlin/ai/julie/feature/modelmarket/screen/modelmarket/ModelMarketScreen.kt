@@ -3,9 +3,9 @@ package ai.julie.feature.modelmarket.screen.modelmarket
 import ai.julie.core.designsystem.component.components.Button
 import ai.julie.core.designsystem.component.components.Text
 import ai.julie.core.designsystem.component.components.textfield.TextField
-import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier

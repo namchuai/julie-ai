@@ -8,9 +8,9 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(projects.core.common)
+            api(libs.nomanr.composables)
             implementation(libs.coil.compose)
             implementation(libs.zoomimage.compose.coil)
-            implementation(libs.nomanr.composables)
         }
     }
 }

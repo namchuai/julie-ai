@@ -1,5 +1,8 @@
 package ai.julie.core.designsystem.component.components
 
+import ai.julie.core.designsystem.component.AppTheme
+import ai.julie.core.designsystem.component.contentColorFor
+import ai.julie.core.designsystem.component.foundation.systemBarsForVisualComponents
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -15,9 +18,6 @@ import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
-import ai.julie.core.designsystem.component.AppTheme
-import ai.julie.core.designsystem.component.contentColorFor
-import ai.julie.core.designsystem.component.foundation.systemBarsForVisualComponents
 import kotlin.jvm.JvmInline
 
 @Composable

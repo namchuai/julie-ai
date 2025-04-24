@@ -1,3 +1,5 @@
 <resources>
     <string name="new_chat">New chat in eng</string>
+
+    <string name="modelconfig_inference_settings">Inference settings</string>
 </resources>
