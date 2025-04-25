@@ -32,6 +32,8 @@ sqlDelightRef = "2.0.2"
 sqldelightJvmDriverRef = "2.0.2"
 okioRef = "3.11.0"
 openaiClientRef = "4.0.1"
+kotbaseRef = "3.1.9-1.1.1"
+kotlinx-datetime = "0.6.2"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -46,9 +48,11 @@ androidx-activity-compose = { module = "androidx.activity:activity-compose", ver
 androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 kermit = { module = "co.touchlab:kermit", version.ref = "kermitRef" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okioRef" }
 openai-client = { module = "com.aallam.openai:openai-client", version.ref = "openaiClientRef" }
+kotbase = { module = "dev.kotbase:couchbase-lite", version.ref = "kotbaseRef" }
 
 # koin
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }

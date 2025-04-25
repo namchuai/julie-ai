@@ -1,16 +1,16 @@
 package ai.julie.core.data.di
 
-import ai.julie.core.data.OpenAiRepository
-import ai.julie.core.data.OpenAiRepositoryImpl
+import ai.julie.core.data.thread.ThreadRepository
+import ai.julie.core.data.thread.ThreadRepositoryImpl
 import ai.julie.core.network.di.networkModule
+import ai.julie.storage.di.storageModule
 import org.koin.dsl.module
 
 val dataModule = module {
     includes(networkModule)
+    includes(storageModule)
 
-    single<OpenAiRepository> {
-        OpenAiRepositoryImpl(
-            httpClientProvider = get(),
-        )
+    single<ThreadRepository> {
+        ThreadRepositoryImpl(get())
     }
 }

@@ -10,10 +10,10 @@ kotlin {
             api(projects.core.common)
             api(projects.core.domain)
 
+            implementation(projects.feature.modelconfig)
             implementation(projects.core.llamabinding)
             implementation(projects.core.logging)
             implementation(projects.core.model)
-            implementation(projects.core.storage)
 
             implementation(libs.navigation.compose)
             implementation(libs.androidx.lifecycle.viewmodel)
