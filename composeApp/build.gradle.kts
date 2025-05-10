@@ -51,6 +51,7 @@ kotlin {
 
             implementation(projects.feature.chat)
             implementation(projects.feature.modelmarket)
+            implementation(projects.feature.modelmanagement)
 
             implementation(libs.koin.core)
             implementation(libs.koin.compose)

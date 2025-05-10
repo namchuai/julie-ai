@@ -1,9 +1,11 @@
 package ai.julie.feature.chat
 
 import ai.julie.core.designsystem.component.components.Accordion
+import ai.julie.core.designsystem.component.components.Button
 import ai.julie.core.designsystem.component.components.Scaffold
 import ai.julie.core.designsystem.component.components.Text
 import ai.julie.feature.modelconfig.screen.modelconfig.ModelConfigContent
+import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
@@ -24,6 +26,8 @@ import com.aallam.openai.api.thread.Thread
 @Composable
 fun ChatScreenRoute(
     viewModel: ChatViewModel,
+    onModelMarketClick: () -> Unit,
+    onModelManagementClick: () -> Unit,
 ) {
     val state by viewModel.uiState.collectAsState()
 
@@ -34,6 +38,8 @@ fun ChatScreenRoute(
         onSendClick = viewModel::onSendClick,
         onNewChatClick = viewModel::onNewChatClick,
         onMessageUpdate = viewModel::onMessageUpdate,
+        onModelMarketClick = onModelMarketClick,
+        onModelManagementClick = onModelManagementClick,
     )
 }
 
@@ -45,6 +51,8 @@ fun ChatScreen(
     onSendClick: () -> Unit,
     onNewChatClick: () -> Unit,
     onMessageUpdate: (String) -> Unit,
+    onModelMarketClick: () -> Unit = {},
+    onModelManagementClick: () -> Unit = {},
 ) {
     ModalNavigationDrawer(
         gesturesEnabled = true,
@@ -71,6 +79,19 @@ fun ChatScreen(
                         }
                     },
                 )
+
+                Button(
+                    onClick = onModelManagementClick,
+                    modifier = Modifier.padding(16.dp),
+                ) {
+                    Text("Model Management")
+                }
+                Button(
+                    onClick = onModelMarketClick,
+                    modifier = Modifier.padding(16.dp),
+                ) {
+                    Text("Model market")
+                }
             }
         }
     ) {
@@ -104,4 +125,28 @@ fun ChatScreen(
             }
         )
     }
+}
+
+@Preview
+@Composable
+private fun ChatScreen_Preview() {
+    ChatScreen(
+        threads = emptyList(),
+        message = "",
+        messages = listOf(
+            MessageItem(
+                id = "1",
+                content = "Hello",
+                isFromUser = true,
+            ),
+            MessageItem(
+                id = "2",
+                content = "Hi",
+                isFromUser = false,
+            ),
+        ),
+        onSendClick = {},
+        onNewChatClick = {},
+        onMessageUpdate = {},
+    )
 }

@@ -1,10 +1,12 @@
 package ai.julie.feature.modelmarket.screen.modelmarket
 
 import ai.julie.core.designsystem.component.components.Button
+import ai.julie.core.designsystem.component.components.Scaffold
 import ai.julie.core.designsystem.component.components.Text
 import ai.julie.core.designsystem.component.components.textfield.TextField
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -19,7 +21,7 @@ fun ModelMarketScreenRoute(
     return ModelMarketScreen(
         downloadUrl = state.downloadUrl,
         onDownloadUrlUpdate = viewModel::onDownloadUrlUpdate,
-        onStartDownloadClick = viewModel::onStartDownloadClick,
+        onStartDownloadClick = viewModel::onDownloadClick,
         onBackClick = onBackClick,
     )
 }
@@ -31,21 +33,29 @@ fun ModelMarketScreen(
     onStartDownloadClick: () -> Unit,
     onBackClick: () -> Unit,
 ) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-    ) {
-        Button(onClick = onBackClick) {
-            Text("Back")
-        }
-        TextField(
-            value = downloadUrl,
-            onValueChange = onDownloadUrlUpdate,
-        )
 
-        Button(
-            onClick = onStartDownloadClick,
-        ) {
-            Text("Download")
+    Scaffold(
+        content = { padding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+            ) {
+                Button(onClick = onBackClick) {
+                    Text("Back")
+                }
+                TextField(
+                    value = downloadUrl,
+                    onValueChange = onDownloadUrlUpdate,
+                )
+
+                Button(
+                    onClick = onStartDownloadClick,
+                ) {
+                    Text("Download")
+                }
+            }
         }
-    }
+    )
+
 }
