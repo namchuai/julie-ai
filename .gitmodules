@@ -1,3 +1,6 @@
 [submodule "core/llamabinding/llamacpp/src/llama.cpp"]
 	path = core/llamabinding/llamacpp/src/llama.cpp
 	url = https://github.com/ggerganov/llama.cpp.git
+[submodule "core/whisperbinding/whispercpp/src/whisper.cpp"]
+	path = core/whisperbinding/whispercpp/src/whisper.cpp
+	url = https://github.com/ggml-org/whisper.cpp.git

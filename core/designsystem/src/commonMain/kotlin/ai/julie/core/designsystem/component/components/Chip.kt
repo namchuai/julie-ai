@@ -141,7 +141,8 @@ private fun ChipComponent(
             null
         }
 
-    val shadowElevation = style.elevation?.shadowElevation(enabled, interactionSource)?.value ?: 0.dp
+    val shadowElevation =
+        style.elevation?.shadowElevation(enabled, interactionSource)?.value ?: 0.dp
 
     Surface(
         onClick = onClick,
@@ -339,7 +340,10 @@ internal data class ChipStyle(
 @Preview
 fun PrimaryChipPreview() {
     AppTheme {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Chip {
                     Row(

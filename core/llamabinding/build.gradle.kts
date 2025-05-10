@@ -54,13 +54,40 @@ kotlin {
                     path = project.file("llamacpp/CMakeLists.txt")
                 }
             }
-
-            // Ensure packaging options don't exclude your .so file (usually not needed)
-            // packaging {
-            //     jniLibs {
-            //         useLegacyPackaging = false // Recommended
-            //     }
-            // }
         }
     }
+
+    dependencies {
+        sourceSets {
+            commonMain.dependencies {
+                implementation(projects.core.model)
+            }
+        }
+    }
+}
+
+// Task to copy native libraries for desktop
+tasks.register("copyNativeLibsForDesktop") {
+    dependsOn(":core:llamabinding:llamacpp:buildHostCMake")
+    doLast {
+        val sourceDir = file("llamacpp/build/cmake-build-host/lib")
+        val targetDir = file("src/desktopMain/resources")
+
+        if (sourceDir.exists()) {
+            targetDir.mkdirs()
+            copy {
+                from(sourceDir)
+                into(targetDir)
+                include("*.dylib", "*.so", "*.dll")
+            }
+            println("Copied native libraries from $sourceDir to $targetDir")
+        } else {
+            println("Source directory $sourceDir does not exist")
+        }
+    }
+}
+
+// Ensure native libs are copied before desktop compilation
+tasks.named("compileKotlinDesktop") {
+    dependsOn("copyNativeLibsForDesktop")
 }

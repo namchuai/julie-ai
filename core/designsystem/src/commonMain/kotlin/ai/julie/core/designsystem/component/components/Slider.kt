@@ -79,7 +79,13 @@ fun Slider(
 ) {
     require(state.steps >= 0) { "steps should be >= 0" }
 
-    BasicSlider(modifier = modifier, state = state, colors = colors, enabled = enabled, interactionSource = interactionSource)
+    BasicSlider(
+        modifier = modifier,
+        state = state,
+        colors = colors,
+        enabled = enabled,
+        interactionSource = interactionSource
+    )
 }
 
 @Composable
@@ -261,7 +267,7 @@ private fun SliderPreview() {
             }
 
             Column {
-                 BasicText(
+                BasicText(
                     text = "Custom Colors",
                     style = AppTheme.typography.h4,
                 )
@@ -280,13 +286,13 @@ private fun SliderPreview() {
             }
 
             Column {
-                 BasicText(
+                BasicText(
                     text = "Interactive Slider",
                     style = AppTheme.typography.h4,
                 )
                 var value by remember { mutableFloatStateOf(50f) }
                 var isEditing by remember { mutableStateOf(false) }
-                 BasicText(
+                BasicText(
                     text = if (isEditing) "Editing..." else "Value: ${value.toInt()}",
                     style = AppTheme.typography.body1,
                 )
@@ -318,13 +324,13 @@ private fun RangeSliderPreview() {
                     .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(32.dp),
         ) {
-             BasicText(
+            BasicText(
                 text = "Range Slider Components",
                 style = AppTheme.typography.h3,
             )
 
             Column {
-                 BasicText(
+                BasicText(
                     text = "Basic Range Slider",
                     style = AppTheme.typography.h4,
                 )
@@ -337,7 +343,7 @@ private fun RangeSliderPreview() {
             }
 
             Column {
-                 BasicText(
+                BasicText(
                     text = "Stepped Range Slider (5 steps)",
                     style = AppTheme.typography.h4,
                 )
@@ -351,7 +357,7 @@ private fun RangeSliderPreview() {
             }
 
             Column {
-                 BasicText(
+                BasicText(
                     text = "Custom Range (0-100)",
                     style = AppTheme.typography.h4,
                 )
@@ -367,11 +373,11 @@ private fun RangeSliderPreview() {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                         BasicText(
+                        BasicText(
                             text = "Start: ${range.start.toInt()}",
                             style = AppTheme.typography.body1,
                         )
-                         BasicText(
+                        BasicText(
                             text = "End: ${range.endInclusive.toInt()}",
                             style = AppTheme.typography.body1,
                         )
@@ -380,7 +386,7 @@ private fun RangeSliderPreview() {
             }
 
             Column {
-                 BasicText(
+                BasicText(
                     text = "Disabled State",
                     style = AppTheme.typography.h4,
                 )
@@ -393,7 +399,7 @@ private fun RangeSliderPreview() {
             }
 
             Column {
-                 BasicText(
+                BasicText(
                     text = "Custom Colors",
                     style = AppTheme.typography.h4,
                 )
@@ -412,13 +418,13 @@ private fun RangeSliderPreview() {
             }
 
             Column {
-                 BasicText(
+                BasicText(
                     text = "Interactive Range Slider",
                     style = AppTheme.typography.h4,
                 )
                 var range by remember { mutableStateOf(30f..70f) }
                 var isEditing by remember { mutableStateOf(false) }
-                 BasicText(
+                BasicText(
                     text = if (isEditing) "Editing..." else "Range: ${range.start.toInt()} - ${range.endInclusive.toInt()}",
                     style = AppTheme.typography.body1,
                 )

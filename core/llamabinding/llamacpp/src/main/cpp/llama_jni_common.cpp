@@ -3,13 +3,11 @@
 #include <cstdio>      // For printf/fflush
 
 // Function definition needs JNIEnv, jobject, llama_model_params
-llama_model_params model_params_from_java(JNIEnv *env, jobject jparams)
-{
+llama_model_params model_params_from_java(JNIEnv *env, jobject jparams) {
     llama_model_params params = llama_model_default_params(); // Start with defaults
 
     jclass params_class = env->GetObjectClass(jparams);
-    if (params_class == nullptr)
-    {
+    if (params_class == nullptr) {
         printf("[llama_jni_common.cpp] Error: Could not find LlamaModelParams class\n"); // Log prefix updated
         fflush(stdout);
         return params;
@@ -48,13 +46,11 @@ llama_model_params model_params_from_java(JNIEnv *env, jobject jparams)
 
 // Helper function to convert Kotlin LlamaContextParams to C llama_context_params
 // NOTE: Only includes fields easily mapped from Kotlin. Callbacks and complex types omitted.
-llama_context_params context_params_from_java(JNIEnv *env, jobject jparams)
-{
+llama_context_params context_params_from_java(JNIEnv *env, jobject jparams) {
     llama_context_params params = llama_context_default_params(); // Start with defaults
 
     jclass params_class = env->GetObjectClass(jparams);
-    if (params_class == nullptr)
-    {
+    if (params_class == nullptr) {
         printf("[llama_jni_common.cpp] Error: Could not find LlamaContextParams class\n"); // Log prefix updated
         fflush(stdout);
         return params;

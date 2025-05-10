@@ -147,7 +147,8 @@ class TextFieldColors(
         errorSuffixColor.takeOrElse { this.errorSuffixColor },
     )
 
-    private fun TextSelectionColors?.takeOrElse(block: () -> TextSelectionColors): TextSelectionColors = this ?: block()
+    private fun TextSelectionColors?.takeOrElse(block: () -> TextSelectionColors): TextSelectionColors =
+        this ?: block()
 
     @Composable
     internal fun leadingIconColor(

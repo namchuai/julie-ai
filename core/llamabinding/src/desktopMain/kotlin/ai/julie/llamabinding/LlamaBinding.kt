@@ -1,33 +1,68 @@
 package ai.julie.llamabinding
 
+import ai.julie.core.model.LlamaSamplerSettings
+import ai.julie.core.model.ModelContextParams
+import ai.julie.core.model.ModelLoadParams
+import ai.julie.llamabinding.model.LlamaContextParams
+import ai.julie.llamabinding.model.LlamaModelParams
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlin.math.exp
+import kotlin.random.Random
+
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
-actual class LlamaBinding actual constructor(
-    modelPath: String // Only model path is needed from common code
-) {
+actual class LlamaBinding {
     private var modelPtr: Long = 0
     private var ctxPtr: Long = 0
 
-    init {
+    actual suspend fun initialize() {
+        // Initialize the LLAMA backend
         LlamaPlatform.initializeBackend()
+        println("LlamaBinding initialized successfully.")
+    }
 
-        // Create default parameter instances (using defaults from NativeMethods.kt)
-        val defaultModelParams = LlamaModelParams()
-        val defaultContextParams = LlamaContextParams()
+    /**
+     * Load a model with progress callback support
+     */
+    actual suspend fun loadModel(
+        modelPath: String,
+        modelLoadParams: ModelLoadParams,
+        modelContextParams: ModelContextParams,
+        progressCallback: LlamaProgressCallback?
+    ) {
+        // Create parameter instances from the provided parameters
+        val llamaModelParams = LlamaModelParams.from(modelLoadParams)
+        val llamaContextParams = LlamaContextParams.from(modelContextParams)
 
-        println("Loading model from: $modelPath with default params...")
-        modelPtr = NativeMethods.llama_model_load_from_file(modelPath, defaultModelParams)
-        if (modelPtr == 0L) {
-            throw RuntimeException("Failed to load Llama model from path: $modelPath")
+        println("Loading model from: $modelPath with provided params...")
+        println("ModelContextParams: nCtx=${modelContextParams.nCtx}, nBatch=${modelContextParams.nBatch}, nUbatch=${modelContextParams.nUbatch}")
+        println("LlamaContextParams: nCtx=${llamaContextParams.nCtx}, nBatch=${llamaContextParams.nBatch}, nUbatch=${llamaContextParams.nUbatch}")
+        modelPtr = if (progressCallback != null) {
+            println("Loading model with progress..")
+            NativeMethods.llama_model_load_from_file_with_progress(
+                modelPath,
+                llamaModelParams,
+                progressCallback
+            )
+        } else {
+            println("Loading model without progress..")
+            NativeMethods.llama_model_load_from_file(modelPath, llamaModelParams)
         }
+
+        require(modelPtr != 0L) { "Failed to load Llama model from path: $modelPath" }
+
         println("Model loaded successfully (pointer: $modelPtr).")
 
-        println("Initializing context with default params...")
-        ctxPtr = NativeMethods.llama_context_init_from_model(modelPtr, defaultContextParams)
-        if (ctxPtr == 0L) {
+        println("Initializing context with provided params...")
+        ctxPtr = NativeMethods.llama_context_init_from_model(modelPtr, llamaContextParams)
+        require(ctxPtr != 0L) {
             NativeMethods.llama_model_free(modelPtr)
             modelPtr = 0
-            throw RuntimeException("Failed to initialize Llama context.")
+            "Failed to initialize Llama context with model pointer: $modelPtr"
         }
+
         println("Context initialized successfully (pointer: $ctxPtr).")
     }
 
@@ -46,13 +81,28 @@ actual class LlamaBinding actual constructor(
         }
     }
 
-    actual fun predict(prompt: String): String {
-        if (ctxPtr == 0L) throw IllegalStateException("Llama context is not initialized or has been closed.")
-        if (modelPtr == 0L) throw IllegalStateException("Llama model is not initialized or has been closed.")
+    actual fun predict(
+        prompt: String,
+        samplerSettings: LlamaSamplerSettings
+    ): Flow<String> = flow {
+        if (ctxPtr == 0L) throw LlamaContextException.ContextNotInitializedException()
+        if (modelPtr == 0L) throw LlamaContextException.ModelNotLoadedException()
+
+        // Get model's default stop tokens and combine with user-provided ones
+        val modelStopTokens = getModelStopTokens()
+        logMessage("Model stop tokens detected: $modelStopTokens")
+        logMessage("User stop tokens from settings: ${samplerSettings.stop}")
+        val allStopWords = modelStopTokens + samplerSettings.stop
+        logMessage("Combined stop words being used: $allStopWords")
 
         // --- Explicit KV Cache Cleanup for sequence 0 --- 
         val sequenceIdToClear = 0
-        NativeMethods.llama_kv_cache_rm(ctxPtr, sequenceIdToClear, -1, -1) // Remove all tokens for seq 0
+        NativeMethods.llama_kv_cache_rm(
+            ctxPtr,
+            sequenceIdToClear,
+            -1,
+            -1
+        ) // Remove all tokens for seq 0
         logMessage("Explicitly cleared KV cache for sequence ID: $sequenceIdToClear")
         // ---------------------------------------------
 
@@ -69,33 +119,57 @@ actual class LlamaBinding actual constructor(
         val eosToken = NativeMethods.llama_token_eos(modelPtr)
 
         if (eosToken == -1) { // Still need EOS for stopping
-             throw RuntimeException("Failed to get EOS token from model")
+            throw RuntimeException("Failed to get EOS token from model")
         }
 
         // tokensList.add(bosToken) // REMOVED: Let llama_tokenize handle BOS
 
+        // Log prompt details for debugging
+        logMessage("Prompt length: ${prompt.length} characters")
+        logMessage("Max context size: $maxContextSize tokens")
+
         // Tokenize prompt securely
-        val promptTokens = IntArray(maxContextSize) 
+        val promptTokens = IntArray(maxContextSize)
+        // Check if prompt already starts with BOS token to avoid duplicates
+        // TODO: this is quite bad code. FYI, <s> is for llama1/2 and <|begin_of_text|> is for llama3. This should be added based on the model architecture?
+        val shouldAddBos = !prompt.startsWith("<|begin_of_text|>") && !prompt.startsWith("<s>")
+        logMessage("Adding BOS token: $shouldAddBos")
+
         val nPromptTokens = NativeMethods.llama_tokenize(
             model = modelPtr,
-            text = prompt, // REMOVED: Manual leading space
+            text = prompt,
             tokens = promptTokens,
             n_max_tokens = maxContextSize,
-            add_bos = true, // CHANGED: Let tokenizer add BOS if needed
+            add_bos = shouldAddBos, // Only add BOS if prompt doesn't already have it
             special = true
         )
 
+        logMessage("Tokenization result: $nPromptTokens tokens")
         if (nPromptTokens < 0) {
-            throw RuntimeException("Failed to tokenize prompt (code: $nPromptTokens): $prompt")
+            logMessage("Tokenization failed with code: $nPromptTokens")
+            logMessage("Full prompt that failed: $prompt")
+            throw LlamaContextException.TokenizationFailedException(
+                errorCode = nPromptTokens,
+                promptLength = prompt.length
+            )
+        }
+
+        if (nPromptTokens >= maxContextSize) {
+            throw LlamaContextException.ContextTooSmallException(
+                promptTokens = nPromptTokens,
+                maxContextTokens = maxContextSize,
+                promptLength = prompt.length
+            )
         }
         // Use the tokens directly from the tokenizer output
         val tokensToProcess = promptTokens.take(nPromptTokens)
 
         // --- Generation Loop ---
-        val stringBuilder = StringBuilder()
+        // val stringBuilder = StringBuilder() // Not needed when emitting directly
         var nEval = 0 // Number of tokens evaluated from prompt + generation
         var nGen = 0 // Number of tokens generated so far
         val sequenceId = intArrayOf(0) // Use sequence ID 0 for this simple case
+        val generatedText = StringBuilder() // Track generated text for stop word checking
 
         // Initialize batch
         val batchPtr = NativeMethods.llama_batch_init(
@@ -103,9 +177,7 @@ actual class LlamaBinding actual constructor(
             embd = 0,           // We are not using embeddings input
             n_seq_max = 1       // Only generating one sequence
         )
-        if (batchPtr == 0L) {
-            throw RuntimeException("Failed to initialize llama_batch")
-        }
+        require(batchPtr != 0L) { "Failed to initialize llama_batch" }
 
         try {
             // Evaluate the initial prompt tokens
@@ -114,11 +186,19 @@ actual class LlamaBinding actual constructor(
 
             // Manually populate the batch using JNI helpers
             for (i in tokensToProcess.indices) { // CHANGED: Use tokensToProcess
-                 NativeMethods.llama_batch_set_token(batchPtr, i, tokensToProcess[i]) // CHANGED
-                 NativeMethods.llama_batch_set_pos(batchPtr, i, i)
-                 NativeMethods.llama_batch_set_seq_id(batchPtr, i, sequenceId[0]) // Assuming sequence 0
-                 // Only need logits for the last token of the prompt
-                 NativeMethods.llama_batch_set_logits(batchPtr, i, (i == tokensToProcess.size - 1)) // CHANGED
+                NativeMethods.llama_batch_set_token(batchPtr, i, tokensToProcess[i]) // CHANGED
+                NativeMethods.llama_batch_set_pos(batchPtr, i, i)
+                NativeMethods.llama_batch_set_seq_id(
+                    batchPtr,
+                    i,
+                    sequenceId[0]
+                ) // Assuming sequence 0
+                // Only need logits for the last token of the prompt
+                NativeMethods.llama_batch_set_logits(
+                    batchPtr,
+                    i,
+                    (i == tokensToProcess.size - 1)
+                ) // CHANGED
             }
             // Set the number of tokens in the batch *after* populating
             NativeMethods.llama_batch_set_n_tokens(batchPtr, tokensToProcess.size) // CHANGED
@@ -145,21 +225,14 @@ actual class LlamaBinding actual constructor(
                     break
                 }
 
-                // 2. Find the token with the highest logit (greedy sampling in Kotlin)
-                var maxLogit = -Float.MAX_VALUE
-                var newTokenId = -1
-                for (tokenId in logits.indices) {
-                    if (logits[tokenId] > maxLogit) {
-                        maxLogit = logits[tokenId]
-                        newTokenId = tokenId
-                    }
-                }
+                // 2. Sample next token using sampler settings
+                val newTokenId = sampleToken(logits, samplerSettings)
 
                 if (newTokenId == -1) {
-                    logMessage("Error: Failed to find max logit. Stopping generation.")
-                    break // Should not happen if logits is not null
+                    logMessage("Error: Failed to sample token. Stopping generation.")
+                    break
                 }
-                logMessage("Sampled token: $newTokenId (Logit: $maxLogit)")
+                logMessage("Sampled token: $newTokenId using temperature: ${samplerSettings.temperature}")
 
                 // Check for EOS
                 if (newTokenId == eosToken || nEval >= maxContextSize) {
@@ -168,17 +241,42 @@ actual class LlamaBinding actual constructor(
                 }
 
                 // --- Detokenize and Append --- (This part should still work)
-                val pieceBuffer = ByteArray(32) // INCREASED BUFFER SIZE: Max size for one token piece
-                val nBytes = NativeMethods.llama_token_to_piece(modelPtr, newTokenId, pieceBuffer, pieceBuffer.size)
+                val pieceBuffer =
+                    ByteArray(32) // INCREASED BUFFER SIZE: Max size for one token piece
+                val nBytes = NativeMethods.llama_token_to_piece(
+                    modelPtr,
+                    newTokenId,
+                    pieceBuffer,
+                    pieceBuffer.size
+                )
                 if (nBytes < 0) {
                     logMessage("Error: llama_token_to_piece failed (code: $nBytes) for token $newTokenId")
                     // Optionally break or continue based on desired error handling
                     break
                 } else if (nBytes > 0) {
                     val piece = pieceBuffer.copyOfRange(0, nBytes).toString(Charsets.UTF_8)
-                    stringBuilder.append(piece)
-                    print(piece) // Print piece by piece
-                    System.out.flush()
+                    generatedText.append(piece)
+
+                    // Check for stop words (model defaults + user provided)
+                    val currentText = generatedText.toString()
+                    var shouldStop = false
+                    for (stopWord in allStopWords) {
+                        if (stopWord.isNotEmpty() && currentText.contains(stopWord)) {
+                            logMessage("Stop word found: '$stopWord' in generated text")
+                            logMessage("Current generated text: '${currentText.takeLast(100)}'") // Show last 100 chars
+                            shouldStop = true
+                            break
+                        }
+                    }
+
+                    // Also log the token piece for debugging
+                    logMessage("Generated token piece: '$piece'")
+
+                    emit(piece) // Emit the generated piece
+
+                    if (shouldStop) break
+                    // print(piece) // Removed, consumer will handle display
+                    // System.out.flush() // Removed
                 }
 
                 // Add the new token to the list for the next iteration's evaluation
@@ -192,9 +290,21 @@ actual class LlamaBinding actual constructor(
 
                 // Manually populate the batch for the single new token
                 NativeMethods.llama_batch_set_token(batchPtr, 0, newTokenId)
-                NativeMethods.llama_batch_set_pos(batchPtr, 0, nEval)         // Position is the total number evaluated so far
-                NativeMethods.llama_batch_set_seq_id(batchPtr, 0, sequenceId[0]) // Assuming sequence 0
-                NativeMethods.llama_batch_set_logits(batchPtr, 0, true)       // Need logits for the newly generated token to sample the *next* one
+                NativeMethods.llama_batch_set_pos(
+                    batchPtr,
+                    0,
+                    nEval
+                )         // Position is the total number evaluated so far
+                NativeMethods.llama_batch_set_seq_id(
+                    batchPtr,
+                    0,
+                    sequenceId[0]
+                ) // Assuming sequence 0
+                NativeMethods.llama_batch_set_logits(
+                    batchPtr,
+                    0,
+                    true
+                )       // Need logits for the newly generated token to sample the *next* one
                 // Set the number of tokens in the batch *after* populating
                 NativeMethods.llama_batch_set_n_tokens(batchPtr, 1)
                 logMessage("Batch populated for generation step. n_tokens = 1, pos = $nEval")
@@ -216,30 +326,30 @@ actual class LlamaBinding actual constructor(
                 NativeMethods.llama_batch_free(batchPtr)
                 logMessage("llama_batch freed.")
             }
-            println() // Ensure newline after generation
+            // println() // Ensure newline after generation - Removed, consumer handles display
         }
 
-        return stringBuilder.toString()
-    }
+        // return stringBuilder.toString() // Not needed when emitting
+    }.flowOn(Dispatchers.Default)
 
     actual fun getContextSize(): Int {
-        if (ctxPtr == 0L) throw IllegalStateException("Llama context is not initialized or has been closed.")
+        if (ctxPtr == 0L) throw LlamaContextException.ContextNotInitializedException()
         return NativeMethods.llama_n_ctx(ctxPtr)
     }
 
     actual fun getVocabSize(): Int {
-        if (ctxPtr == 0L) throw IllegalStateException("Llama context is not initialized or has been closed.")
-        if (modelPtr == 0L) throw IllegalStateException("Llama model is not initialized or has been closed.")
+        if (ctxPtr == 0L) throw LlamaContextException.ContextNotInitializedException()
+        if (modelPtr == 0L) throw LlamaContextException.ModelNotLoadedException()
         return NativeMethods.llama_model_n_vocab(modelPtr)
     }
 
     actual fun getEmbeddingSize(): Int {
-        if (modelPtr == 0L) throw IllegalStateException("Llama model is not initialized or has been closed.")
+        if (modelPtr == 0L) throw LlamaContextException.ModelNotLoadedException()
         return NativeMethods.llama_model_n_embd(modelPtr)
     }
 
     actual fun getModelDescription(): String {
-        if (modelPtr == 0L) throw IllegalStateException("Llama model is not initialized or has been closed.")
+        if (modelPtr == 0L) throw LlamaContextException.ModelNotLoadedException()
         val bufferSize = 256
         val buffer = ByteArray(bufferSize)
         val length = NativeMethods.llama_model_desc(modelPtr, buffer, bufferSize)
@@ -252,8 +362,226 @@ actual class LlamaBinding actual constructor(
         }
     }
 
+    actual suspend fun recreateContext(newContextParams: ModelContextParams) {
+        if (modelPtr == 0L) throw LlamaContextException.ModelNotLoadedException()
+        
+        println("Recreating context with new parameters...")
+        println("New params: nCtx=${newContextParams.nCtx}, nBatch=${newContextParams.nBatch}, nUbatch=${newContextParams.nUbatch}")
+        
+        // Free existing context if it exists
+        if (ctxPtr != 0L) {
+            println("Freeing existing context (pointer: $ctxPtr)...")
+            NativeMethods.llama_context_free(ctxPtr)
+            ctxPtr = 0
+            println("Existing context freed.")
+        }
+        
+        // Create new context with updated parameters
+        val llamaContextParams = LlamaContextParams.from(newContextParams)
+        println("Creating new context with updated params...")
+        ctxPtr = NativeMethods.llama_context_init_from_model(modelPtr, llamaContextParams)
+        
+        require(ctxPtr != 0L) {
+            "Failed to recreate Llama context with new parameters"
+        }
+        
+        println("Context recreated successfully (pointer: $ctxPtr).")
+        println("New context size: ${NativeMethods.llama_n_ctx(ctxPtr)} tokens")
+    }
+
     // Private helper for logging within this class
     private fun logMessage(message: String) {
         println("[LlamaBinding] $message")
     }
-} 
+
+    /**
+     * Sample a token from logits using the provided sampler settings
+     */
+    private fun sampleToken(logits: FloatArray, samplerSettings: LlamaSamplerSettings): Int {
+        return when {
+            samplerSettings.temperature <= 0.0f -> {
+                // Greedy sampling (temperature = 0)
+                greedySample(logits)
+            }
+
+            else -> {
+                // Temperature-based sampling
+                temperatureSample(logits, samplerSettings)
+            }
+        }
+    }
+
+    /**
+     * Greedy sampling - pick the token with highest logit
+     */
+    private fun greedySample(logits: FloatArray): Int {
+        var maxLogit = -Float.MAX_VALUE
+        var bestToken = -1
+
+        for (tokenId in logits.indices) {
+            if (logits[tokenId] > maxLogit) {
+                maxLogit = logits[tokenId]
+                bestToken = tokenId
+            }
+        }
+
+        return bestToken
+    }
+
+    /**
+     * Temperature-based sampling with top-k and top-p support
+     */
+    private fun temperatureSample(logits: FloatArray, samplerSettings: LlamaSamplerSettings): Int {
+        // Step 1: Apply temperature
+        val scaledLogits = logits.map { it / samplerSettings.temperature }.toFloatArray()
+
+        // Step 2: Convert to probabilities using softmax
+        val probabilities = softmax(scaledLogits)
+
+        // Step 3: Apply top-k filtering if enabled
+        val filteredProbs =
+            if (samplerSettings.topK > 0 && samplerSettings.topK < probabilities.size) {
+                applyTopK(probabilities, samplerSettings.topK)
+            } else {
+                probabilities
+            }
+
+        // Step 4: Apply top-p (nucleus) filtering if enabled
+        val finalProbs = if (samplerSettings.topP < 1.0f) {
+            applyTopP(filteredProbs, samplerSettings.topP)
+        } else {
+            filteredProbs
+        }
+
+        // Step 5: Sample from the filtered distribution
+        return sampleFromProbabilities(finalProbs, samplerSettings.seed)
+    }
+
+    /**
+     * Convert logits to probabilities using softmax
+     */
+    private fun softmax(logits: FloatArray): FloatArray {
+        // Find max for numerical stability
+        val maxLogit = logits.maxOrNull() ?: 0f
+
+        // Calculate exp values
+        val expValues = logits.map { exp(it - maxLogit) }
+        val sum = expValues.sum()
+
+        // Normalize to probabilities
+        return expValues.map { it / sum }.toFloatArray()
+    }
+
+    /**
+     * Apply top-k filtering - keep only the top k tokens
+     */
+    private fun applyTopK(probabilities: FloatArray, topK: Int): FloatArray {
+        // Create token-probability pairs and sort by probability (descending)
+        val tokenProbs = probabilities.mapIndexed { index, prob -> index to prob }
+            .sortedByDescending { it.second }
+
+        // Zero out probabilities for tokens not in top-k
+        val filtered = FloatArray(probabilities.size) { 0f }
+
+        for (i in 0 until minOf(topK, tokenProbs.size)) {
+            val (tokenIndex, prob) = tokenProbs[i]
+            filtered[tokenIndex] = prob
+        }
+
+        // Renormalize
+        val sum = filtered.sum()
+        return if (sum > 0) {
+            filtered.map { it / sum }.toFloatArray()
+        } else {
+            probabilities // Fallback to original if filtering failed
+        }
+    }
+
+    /**
+     * Apply top-p (nucleus) filtering - keep tokens until cumulative probability exceeds p
+     */
+    private fun applyTopP(probabilities: FloatArray, topP: Float): FloatArray {
+        // Create token-probability pairs and sort by probability (descending)
+        val tokenProbs = probabilities.mapIndexed { index, prob -> index to prob }
+            .sortedByDescending { it.second }
+
+        val filtered = FloatArray(probabilities.size) { 0f }
+        var cumulativeProb = 0f
+
+        // Add tokens until we exceed top-p threshold
+        for ((tokenIndex, prob) in tokenProbs) {
+            if (cumulativeProb >= topP) break
+
+            filtered[tokenIndex] = prob
+            cumulativeProb += prob
+        }
+
+        // Renormalize
+        val sum = filtered.sum()
+        return if (sum > 0) {
+            filtered.map { it / sum }.toFloatArray()
+        } else {
+            probabilities // Fallback to original if filtering failed
+        }
+    }
+
+    /**
+     * Sample from probability distribution
+     */
+    private fun sampleFromProbabilities(probabilities: FloatArray, seed: Int): Int {
+        // Use provided seed or random
+        val random = if (seed >= 0) Random(seed) else Random.Default
+        val randomValue = random.nextFloat()
+
+        var cumulativeProb = 0f
+        for (i in probabilities.indices) {
+            cumulativeProb += probabilities[i]
+            if (randomValue < cumulativeProb) {
+                return i
+            }
+        }
+
+        // Fallback to last token if we didn't sample anything (shouldn't happen)
+        return probabilities.size - 1
+    }
+
+    /**
+     * Get model's default stop tokens from GGUF metadata
+     */
+    private fun getModelStopTokens(): List<String> {
+        if (modelPtr == 0L) return emptyList()
+
+        val stopTokens = mutableListOf<String>()
+
+        try {
+            // Get EOS token ID and convert to string
+            val eosTokenId = NativeMethods.llama_token_eos(modelPtr)
+            if (eosTokenId >= 0) {
+                val eosTokenString = NativeMethods.llama_model_token_to_piece(modelPtr, eosTokenId)
+                if (!eosTokenString.isNullOrEmpty()) {
+                    stopTokens.add(eosTokenString)
+                    logMessage("Added model EOS token: '$eosTokenString' (ID: $eosTokenId)")
+                }
+            }
+
+            // Try to get chat template stop tokens if available
+            val chatTemplate =
+                NativeMethods.llama_model_meta_val_str(modelPtr, "tokenizer.chat_template")
+            if (!chatTemplate.isNullOrEmpty()) {
+                // Look for common stop sequences in chat templates
+                val commonStops = listOf("</s>", "<|eot_id|>", "<|end_of_text|>", "<|im_end|>")
+                for (stop in commonStops) {
+                    if (chatTemplate.contains(stop) && !stopTokens.contains(stop)) {
+                        stopTokens.add(stop)
+                        logMessage("Added chat template stop token: '$stop'")
+                    }
+                }
+            }
+
+        } catch (e: Exception) {
+            logMessage("Error reading model stop tokens: ${e.message}")
+        }
+
+        return stopTokens
+    }
+}

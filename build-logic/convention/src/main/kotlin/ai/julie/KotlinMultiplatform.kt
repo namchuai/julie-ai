@@ -52,6 +52,8 @@ internal fun Project.configureKotlinMultiplatform(
         all {
             languageSettings.optIn("kotlin.uuid.ExperimentalUuidApi")
             languageSettings.optIn("com.aallam.openai.api.BetaOpenAI")
+            languageSettings.optIn("kotlin.time.ExperimentalTime")
+            languageSettings.optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
         }
     }
 }

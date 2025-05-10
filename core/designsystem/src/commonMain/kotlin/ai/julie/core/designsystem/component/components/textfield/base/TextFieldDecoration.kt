@@ -81,7 +81,11 @@ internal fun CommonDecorationBox(
         showLabel = label != null,
     ) { placeholderAlphaProgress ->
 
-        val labelColor = colors.labelColor(enabled = enabled, isError = isError, interactionSource = interactionSource).value
+        val labelColor = colors.labelColor(
+            enabled = enabled,
+            isError = isError,
+            interactionSource = interactionSource
+        ).value
         val decoratedLabel: @Composable (() -> Unit)? =
             label?.let {
                 @Composable {
@@ -149,11 +153,16 @@ internal fun CommonDecorationBox(
                 }
             }
 
-        val supportingTextColor = colors.supportingTextColor(enabled, isError, interactionSource).value
+        val supportingTextColor =
+            colors.supportingTextColor(enabled, isError, interactionSource).value
         val decoratedSupporting: @Composable (() -> Unit)? =
             supportingText?.let {
                 @Composable {
-                    Decoration(contentColor = supportingTextColor, typography = AppTheme.typography.body2, content = it)
+                    Decoration(
+                        contentColor = supportingTextColor,
+                        typography = AppTheme.typography.body2,
+                        content = it
+                    )
                 }
             }
 
@@ -308,7 +317,10 @@ internal fun Modifier.containerUnderline(
             drawLine(
                 color = indicatorColor.value,
                 start = androidx.compose.ui.geometry.Offset(0f, size.height - strokeWidthPx / 2),
-                end = androidx.compose.ui.geometry.Offset(size.width, size.height - strokeWidthPx / 2),
+                end = androidx.compose.ui.geometry.Offset(
+                    size.width,
+                    size.height - strokeWidthPx / 2
+                ),
                 strokeWidth = strokeWidthPx,
             )
         },

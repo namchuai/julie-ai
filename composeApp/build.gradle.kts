@@ -41,6 +41,7 @@ kotlin {
 
             implementation(libs.ktor.client.android)
             implementation(libs.kotlinx.coroutines.android)
+            implementation(libs.filekit.dialogs)
         }
 
         commonMain.dependencies {
@@ -48,12 +49,30 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
+            implementation(compose.materialIconsExtended)
 
+            implementation(projects.core.model)
+            implementation(projects.feature.thread.api)
+            implementation(projects.feature.thread.impl)
+            implementation(projects.feature.modelconfig.impl)
             implementation(projects.feature.chat)
             implementation(projects.feature.modelmarket)
+            implementation(projects.feature.modelmanagement.api)
+            implementation(projects.feature.modelmanagement.impl)
+            implementation(projects.feature.message.api)
+            implementation(projects.feature.message.impl)
+            implementation(projects.feature.jinjaparser.impl)
+            implementation(projects.feature.promptlab)
+            implementation(projects.feature.pythonrunner.api)
+            implementation(projects.feature.pythonrunner.impl)
+            implementation(projects.feature.hardwaremonitor.api)
+            implementation(projects.feature.hardwaremonitor.impl)
+            implementation(projects.feature.appsetting.api)
+            implementation(projects.feature.appsetting.impl)
 
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
+            implementation(libs.koin.composeVM)
             implementation(libs.navigation.compose)
         }
 
@@ -65,6 +84,7 @@ kotlin {
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
+            implementation(libs.filekit.dialogs)
         }
 
         desktopMain.resources.srcDirs("build/processedResources/desktop/main")
@@ -89,7 +109,7 @@ android {
     }
     buildTypes {
         getByName("release") {
-            isMinifyEnabled = true
+            isMinifyEnabled = false  // Temporarily disable ProGuard for desktop builds
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -121,21 +141,23 @@ compose.desktop {
     application {
         mainClass = "ai.julie.MainKt"
 
-        // Define the path to the native library directory
-        // val nativeLibDir = layout.buildDirectory.dir("processedResources/desktop/main").get().asFile // Old path
-        // Define paths to the CMake output directories relative to composeApp build
+        // Define paths to all possible native library locations
         val llamacppProject = project(":core:llamabinding:llamacpp")
-        val cmakeBuildDirLib = llamacppProject.buildDir.resolve("cmake-build/lib")
-        val cmakeBuildDirBin = llamacppProject.buildDir.resolve("cmake-build/bin")
+        val cmakeBuildDirLib = llamacppProject.buildDir.resolve("cmake-build-host/lib")
+        val cmakeBuildDirBin = llamacppProject.buildDir.resolve("cmake-build-host/bin")
+        val processedResourcesDir =
+            layout.buildDirectory.dir("processedResources/desktop/main").get().asFile
 
-        // Set the java.library.path using jvmArgs to include both directories
-        // Ensure the directories exist before trying to set the property
-        if (cmakeBuildDirLib.isDirectory && cmakeBuildDirBin.isDirectory) {
-            jvmArgs += "-Djava.library.path=${cmakeBuildDirLib.absolutePath}${File.pathSeparator}${cmakeBuildDirBin.absolutePath}"
-        } else {
-            // Optionally add a warning if the directories don't exist at configuration time
-            logger.warn("CMake output directories not found during configuration: ${cmakeBuildDirLib.absolutePath} or ${cmakeBuildDirBin.absolutePath}")
-        }
+        // Build library path with all possible locations
+        val libraryPaths = listOf(
+            cmakeBuildDirLib.absolutePath,
+            cmakeBuildDirBin.absolutePath,
+            processedResourcesDir.absolutePath,
+            System.getProperty("user.dir")
+        )
+
+        val libraryPath = libraryPaths.joinToString(File.pathSeparator)
+        jvmArgs += "-Djava.library.path=$libraryPath"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
@@ -145,6 +167,10 @@ compose.desktop {
             // Include the native library from the nativelib module's build output
             modules("java.instrument") // Example existing module, keep others if present
             includeAllModules = true // Ensure dependent modules are included
+            
+            linux {
+                modules("jdk.security.auth")
+            }
         }
     }
 }
@@ -166,19 +192,42 @@ tasks.register<ComposeHotRun>("runHot") {
 // --- Explicitly configure the 'run' task --- 
 tasks.withType<JavaExec>().configureEach { // Configure ALL JavaExec tasks (includes 'run')
     // Depends on the native library being built
-    dependsOn(project(":core:llamabinding:llamacpp").tasks.named("buildHostCMake")) // Renamed task
+    dependsOn(project(":core:llamabinding:llamacpp").tasks.named("buildHostCMake"))
+    dependsOn(project(":core:llamabinding:llamacpp").tasks.named("copyHostNativeLib"))
 
     // Set the system property directly on the task
     val llamacppProject = project(":core:llamabinding:llamacpp")
-    val cmakeBuildDirLib = llamacppProject.buildDir.resolve("cmake-build/lib")
-    val cmakeBuildDirBin = llamacppProject.buildDir.resolve("cmake-build/bin")
+    val cmakeBuildDirLib = llamacppProject.buildDir.resolve("cmake-build-host/lib")
+    val cmakeBuildDirBin = llamacppProject.buildDir.resolve("cmake-build-host/bin")
 
-    if (cmakeBuildDirLib.isDirectory && cmakeBuildDirBin.isDirectory) {
-        systemProperty(
-            "java.library.path",
-            "${cmakeBuildDirLib.absolutePath}${File.pathSeparator}${cmakeBuildDirBin.absolutePath}"
-        )
-    } else {
-        logger.warn("CMake output directories not found when configuring run task: ${cmakeBuildDirLib.absolutePath} or ${cmakeBuildDirBin.absolutePath}")
+    // Also include the processed resources directory where libraries are copied
+    val processedResourcesDir =
+        layout.buildDirectory.dir("processedResources/desktop/main").get().asFile
+
+    // Build library path with all possible locations
+    val libraryPaths = mutableListOf<String>()
+
+    // Add cmake build directories
+    libraryPaths.add(cmakeBuildDirLib.absolutePath)
+    libraryPaths.add(cmakeBuildDirBin.absolutePath)
+
+    // Add processed resources directory
+    libraryPaths.add(processedResourcesDir.absolutePath)
+
+    // Add current working directory as fallback
+    libraryPaths.add(System.getProperty("user.dir"))
+
+    val libraryPath = libraryPaths.joinToString(File.pathSeparator)
+
+    systemProperty("java.library.path", libraryPath)
+
+    // Log the library path for debugging
+    doFirst {
+        println("java.library.path set to: $libraryPath")
+        println("Looking for libllama_jni.dylib in:")
+        libraryPaths.forEach { path ->
+            val file = File(path, "libllama_jni.dylib")
+            println("  $path -> ${if (file.exists()) "FOUND" else "NOT FOUND"}")
+        }
     }
 }

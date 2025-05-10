@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.julie.kotlinMultiplatform)
     alias(libs.plugins.julie.composeMultiplatform)
+    alias(libs.plugins.kotlin.parcelize)
 }
 
 compose.resources {
@@ -12,6 +13,7 @@ compose.resources {
 kotlin {
     sourceSets {
         commonMain.dependencies {
+            implementation(libs.androidx.lifecycle.viewmodel)
             implementation(compose.components.resources)
         }
     }

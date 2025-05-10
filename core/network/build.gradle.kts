@@ -20,6 +20,7 @@ kotlin {
 
             implementation(libs.kotlinx.serialization.json)
             api(libs.bundles.ktor.common)
+            implementation(libs.filekit.core)
         }
         desktopMain.dependencies {
             implementation(libs.ktor.client.java)

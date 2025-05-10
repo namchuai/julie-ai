@@ -4,6 +4,7 @@ import ai.julie.core.designsystem.component.AppTheme
 import ai.julie.core.designsystem.component.LocalContentColor
 import ai.julie.core.designsystem.component.components.Surface
 import ai.julie.core.designsystem.component.components.topbar.TopBarDefaults.TopBarHeight
+import ai.julie.core.designsystem.component.components.topbar.TopBarState.Companion.Saver
 import ai.julie.core.designsystem.component.contentColorFor
 import ai.julie.core.designsystem.component.foundation.systemBarsForVisualComponents
 import androidx.compose.animation.animateColorAsState
@@ -263,11 +264,11 @@ class TopBarState(
         get() =
             if (heightOffsetLimit != 0f) {
                 1 - (
-                    (heightOffsetLimit - contentOffset).coerceIn(
-                        minimumValue = heightOffsetLimit,
-                        maximumValue = 0f,
-                    ) / heightOffsetLimit
-                )
+                        (heightOffsetLimit - contentOffset).coerceIn(
+                            minimumValue = heightOffsetLimit,
+                            maximumValue = 0f,
+                        ) / heightOffsetLimit
+                        )
             } else {
                 0f
             }
