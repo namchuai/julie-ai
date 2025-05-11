@@ -1,4 +1,4 @@
-package ai.julie.core.fs.types
+package ai.julie.core.fs.model
 
 enum class FileType {
     GgufModel // Represents GGUF model files (usually .gguf extension)

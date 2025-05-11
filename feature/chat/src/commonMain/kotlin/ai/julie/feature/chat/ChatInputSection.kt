@@ -3,7 +3,6 @@ package ai.julie.feature.chat
 import ai.julie.core.designsystem.component.components.Icon
 import ai.julie.core.designsystem.component.components.Text
 import ai.julie.core.designsystem.component.components.textfield.TextField
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,7 +27,6 @@ fun ChatInputSection(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(Color(0xFFFCE4EC))
     ) {
         // Message input box
         ChatInputField(

@@ -1,6 +1,6 @@
 package ai.julie.feature.modelmanagement.screen.localmodelmanagement
 
-import ai.julie.core.domain.modelmanagement.GetDownloadedGgufFiles
+import ai.julie.core.domain.modelmanagement.GetLocalAiModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class LocalModelManagementViewModel(
-    private val getDownloadedGgufFiles: GetDownloadedGgufFiles,
+    private val getDownloadedGgufFiles: GetLocalAiModels,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(State())

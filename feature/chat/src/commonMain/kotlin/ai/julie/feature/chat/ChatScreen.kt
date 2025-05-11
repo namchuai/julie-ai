@@ -4,6 +4,8 @@ import ai.julie.core.designsystem.component.components.Accordion
 import ai.julie.core.designsystem.component.components.Button
 import ai.julie.core.designsystem.component.components.Scaffold
 import ai.julie.core.designsystem.component.components.Text
+import ai.julie.core.designsystem.component.components.topbar.TopBar
+import ai.julie.core.model.aimodel.AiModel
 import ai.julie.feature.modelconfig.screen.modelconfig.ModelConfigContent
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Column
@@ -15,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -26,10 +29,14 @@ import com.aallam.openai.api.thread.Thread
 @Composable
 fun ChatScreenRoute(
     viewModel: ChatViewModel,
+    selectedModel: AiModel,
     onModelMarketClick: () -> Unit,
     onModelManagementClick: () -> Unit,
 ) {
     val state by viewModel.uiState.collectAsState()
+    LaunchedEffect(Unit) {
+        viewModel.handleModel(selectedModel)
+    }
 
     ChatScreen(
         threads = state.threads,
@@ -96,15 +103,16 @@ fun ChatScreen(
         }
     ) {
         Scaffold(
-//            topBar = {
-//                TopBar {
-//                    Text("Chat")
-//                }
-//            },
-            content = {
+            topBar = {
+                TopBar {
+                    Text("Chat")
+                }
+            },
+            content = { padding ->
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
+                        .padding(padding)
                 ) {
                     ChatMessageList(
                         messages = messages,

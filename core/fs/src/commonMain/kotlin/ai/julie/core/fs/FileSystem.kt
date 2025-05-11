@@ -1,6 +1,7 @@
 package ai.julie.core.fs
 
-import ai.julie.core.fs.types.ListFileOpts
+import ai.julie.core.fs.model.FileModel
+import ai.julie.core.fs.model.ListFileOpts
 
 /**
  * Provides platform-specific file system operations.
@@ -43,5 +44,5 @@ expect class FileSystem {
      * Lists files within the writable path, filtered by the provided options.
      * Returns a list of relative file paths.
      */
-    suspend fun listFiles(opts: ListFileOpts): List<String>
+    suspend fun listFiles(opts: ListFileOpts): List<FileModel>
 }

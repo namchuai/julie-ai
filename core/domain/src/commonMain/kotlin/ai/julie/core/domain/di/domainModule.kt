@@ -3,8 +3,10 @@ package ai.julie.core.domain.di
 import ai.julie.core.data.di.dataModule
 import ai.julie.core.domain.CreateChatCompletionStreamUseCase
 import ai.julie.core.domain.CreateChatCompletionUseCase
+import ai.julie.core.domain.InitLocalModelUseCase
+import ai.julie.core.domain.PromptLocalModelUseCase
 import ai.julie.core.domain.model.download.DownloadModelViaUrlUseCase
-import ai.julie.core.domain.modelmanagement.GetDownloadedGgufFiles
+import ai.julie.core.domain.modelmanagement.GetLocalAiModels
 import ai.julie.core.domain.thread.CreateThreadUseCase
 import ai.julie.core.domain.thread.GetThreadFlowUseCase
 import ai.julie.core.fs.di.fsModule
@@ -22,5 +24,7 @@ val domainModule = module {
     factoryOf(::DownloadModelViaUrlUseCase)
     factoryOf(::CreateThreadUseCase)
     factoryOf(::GetThreadFlowUseCase)
-    factoryOf(::GetDownloadedGgufFiles)
+    factoryOf(::GetLocalAiModels)
+    factoryOf(::InitLocalModelUseCase)
+    factoryOf(::PromptLocalModelUseCase)
 }

@@ -1,5 +1,7 @@
 package ai.julie.llamabinding
 
+import ai.julie.core.model.ModelLoadParams
+import ai.julie.core.model.ModelContextParams
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 /**
@@ -10,10 +12,15 @@ import kotlin.io.encoding.ExperimentalEncodingApi
  * Parameters for model/context loading are handled internally by the actual implementation.
  */
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
-expect class LlamaBinding(
-    modelPath: String // Only model path is needed from common code
-    // Removed LlamaModelParams and LlamaContextParams
-) {
+expect class LlamaBinding() {
+    suspend fun initialize()
+
+    suspend fun loadModel(
+        modelPath: String,
+        modelLoadParams: ModelLoadParams,
+        modelContextParams: ModelContextParams,
+    )
+
     /**
      * Releases the native resources associated with this model and context.
      * Must be called when the binding is no longer needed.

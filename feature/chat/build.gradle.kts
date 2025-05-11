@@ -11,7 +11,6 @@ kotlin {
             api(projects.core.domain)
 
             implementation(projects.feature.modelconfig)
-            implementation(projects.core.llamabinding)
             implementation(projects.core.logging)
             implementation(projects.core.model)
 
@@ -24,7 +23,6 @@ kotlin {
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
-            implementation(projects.core.llamabinding)
         }
     }
 }

@@ -1,5 +1,6 @@
 package ai.julie.feature.modelmanagement.navigation
 
+import ai.julie.core.model.aimodel.AiModel
 import ai.julie.feature.modelmanagement.screen.localmodelmanagement.LocalModelManagementScreenRoute
 import ai.julie.feature.modelmanagement.screen.localmodelmanagement.LocalModelManagementViewModel
 import androidx.navigation.NavController
@@ -9,15 +10,23 @@ import kotlinx.serialization.Serializable
 import org.koin.compose.viewmodel.koinViewModel
 
 @Serializable
-internal data object ModelManagementScreen
+data object ModelManagement
+
+@Serializable
+data object ModelManagementScreen
 
 fun NavController.navigateToModelManagement() = navigate(route = ModelManagementScreen)
 
 fun NavGraphBuilder.modelManagementGraph(
+    onModelClick: (AiModel) -> Unit = {},
     onBackClick: () -> Unit,
 ) {
-    composable<ModelManagementScreen> {
+    composable<ModelManagement> {
         val viewModel = koinViewModel<LocalModelManagementViewModel>()
-        LocalModelManagementScreenRoute(viewModel, onBackClick)
+        LocalModelManagementScreenRoute(
+            viewModel = viewModel,
+            onModelClick = onModelClick,
+            onBackClick = onBackClick,
+        )
     }
 }

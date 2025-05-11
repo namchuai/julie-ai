@@ -1,8 +1,9 @@
 package ai.julie.core.fs
 
-import ai.julie.core.fs.types.FileType
-import ai.julie.core.fs.types.ListFileOpts
-import ai.julie.core.fs.types.getDirName
+import ai.julie.core.fs.model.FileModel
+import ai.julie.core.fs.model.FileType
+import ai.julie.core.fs.model.ListFileOpts
+import ai.julie.core.fs.model.getDirName
 import android.content.Context
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -57,7 +58,7 @@ actual class FileSystem(
                 return@withContext null
             }
             file.readBytes()
-        } catch (e: FileNotFoundException) {
+        } catch (_: FileNotFoundException) {
             null
         } catch (e: SecurityException) {
             println("SecurityException reading file: ${file.absolutePath}. Check permissions. ${e.message}")
@@ -85,7 +86,12 @@ actual class FileSystem(
         }
 
         baseDir.listFiles(fileFilter)
-            ?.map { it.name } // Return only the relative name
+            ?.map {
+                FileModel(
+                    name = it.name,
+                    absolutePath = it.absolutePath,
+                )
+            } // Return only the relative name
             ?: emptyList()
     }
 }

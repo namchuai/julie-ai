@@ -54,13 +54,14 @@ kotlin {
                     path = project.file("llamacpp/CMakeLists.txt")
                 }
             }
+        }
+    }
 
-            // Ensure packaging options don't exclude your .so file (usually not needed)
-            // packaging {
-            //     jniLibs {
-            //         useLegacyPackaging = false // Recommended
-            //     }
-            // }
+    dependencies {
+        sourceSets {
+            commonMain.dependencies {
+                implementation(projects.core.model)
+            }
         }
     }
 }

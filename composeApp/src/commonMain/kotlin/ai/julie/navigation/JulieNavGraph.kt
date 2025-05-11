@@ -1,7 +1,8 @@
 package ai.julie.navigation
 
-import ai.julie.feature.chat.navigation.Chat
 import ai.julie.feature.chat.navigation.chatGraph
+import ai.julie.feature.chat.navigation.navigateToChat
+import ai.julie.feature.modelmanagement.navigation.ModelManagement
 import ai.julie.feature.modelmanagement.navigation.modelManagementGraph
 import ai.julie.feature.modelmanagement.navigation.navigateToModelManagement
 import ai.julie.feature.modelmarket.navigation.modelMarketGraph
@@ -15,7 +16,7 @@ import androidx.navigation.compose.rememberNavController
 @Composable
 fun JulieNavGraph(
     modifier: Modifier = Modifier,
-    startDestination: Any = Chat,
+    startDestination: Any = ModelManagement,
     navController: NavHostController = rememberNavController(),
 ) {
     NavHost(
@@ -23,15 +24,15 @@ fun JulieNavGraph(
         startDestination = startDestination,
         navController = navController,
     ) {
+        modelManagementGraph(
+            onModelClick = { navController.navigateToChat(it) },
+            onBackClick = navController::navigateUp,
+        )
         chatGraph(
-            navController = navController,
             onModelMarketClick = { navController.navigateToModelMarket() },
             onModelManagementClick = { navController.navigateToModelManagement() },
         )
         modelMarketGraph(
-            onBackClick = navController::navigateUp,
-        )
-        modelManagementGraph(
             onBackClick = navController::navigateUp,
         )
     }
