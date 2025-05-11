@@ -49,8 +49,10 @@ kotlin {
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
 
+            implementation(projects.core.model)
             implementation(projects.feature.chat)
             implementation(projects.feature.modelmarket)
+            implementation(projects.feature.modelmanagement)
 
             implementation(libs.koin.core)
             implementation(libs.koin.compose)

@@ -37,6 +37,7 @@ include(
     ":feature:modelmarket",
     ":feature:modelconfig",
     ":feature:thread",
+    ":core:fs",
 )
 rootProject.name = "Julie"
 

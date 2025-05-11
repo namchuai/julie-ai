@@ -3,6 +3,7 @@ package ai.julie.feature.chat
 import ai.julie.core.designsystem.component.components.Button
 import ai.julie.core.designsystem.component.components.ButtonVariant
 import ai.julie.core.designsystem.component.components.Text
+import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -30,4 +31,12 @@ fun NewChatButton(
             Text("New chat")
         }
     }
+}
+
+@Preview
+@Composable
+private fun NewChatButton_Preview() {
+    NewChatButton(
+        onClick = {}
+    )
 }

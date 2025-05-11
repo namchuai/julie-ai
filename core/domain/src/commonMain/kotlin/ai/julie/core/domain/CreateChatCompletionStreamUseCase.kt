@@ -15,7 +15,7 @@ class CreateChatCompletionStreamUseCase {
         messages: List<ChatMessage>,
     ): Flow<ChatCompletionChunk> {
         val openai = OpenAI(
-            token = token = "placeholder",
+            token = "placeholder",
             timeout = Timeout(socket = 60.seconds),
         )
         return openai.chatCompletions(

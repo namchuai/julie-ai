@@ -28,9 +28,10 @@ zoomimageComposeCoil = "1.1.0"
 lumoRef = "1.2.2"
 composableRef = "1.1.0"
 kermitRef = "2.0.5"
+couchbase-lite-kermit = "3.1.9-1.1.1"
 sqlDelightRef = "2.0.2"
 sqldelightJvmDriverRef = "2.0.2"
-okioRef = "3.11.0"
+okio = "3.11.0"
 openaiClientRef = "4.0.1"
 kotbaseRef = "3.1.9-1.1.1"
 kotlinx-datetime = "0.6.2"
@@ -43,16 +44,16 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 androidx-test-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-junit" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidx-espresso-core" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidx-appcompat" }
-androidx-material = { group = "com.google.android.material", name = "material", version.ref = "androidx-material" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
 androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 kermit = { module = "co.touchlab:kermit", version.ref = "kermitRef" }
-okio = { module = "com.squareup.okio:okio", version.ref = "okioRef" }
+okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 openai-client = { module = "com.aallam.openai:openai-client", version.ref = "openaiClientRef" }
 kotbase = { module = "dev.kotbase:couchbase-lite", version.ref = "kotbaseRef" }
+kotbase-lite-kermit = { module = "dev.kotbase:couchbase-lite-kermit", version.ref = "couchbase-lite-kermit" }
 
 # koin
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
@@ -103,7 +104,6 @@ androidLibrary = { id = "com.android.library", version.ref = "agp" }
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
-kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 buildConfig = { id = "com.github.gmazzo.buildconfig", version.ref = "buildConfig" }

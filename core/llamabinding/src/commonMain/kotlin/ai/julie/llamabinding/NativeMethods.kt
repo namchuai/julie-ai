@@ -1,42 +1,14 @@
 package ai.julie.llamabinding
 
-// Contains pointer typealiases, concrete param classes, and the NativeMethods object.
+import ai.julie.llamabinding.model.LlamaContextParams
+import ai.julie.llamabinding.model.LlamaModelParams
 
-// Represents the opaque pointers returned by llama.cpp
 typealias LlamaModelPointer = Long
 typealias LlamaContextPointer = Long
-typealias LlamaBatchPointer = Long // Assuming we wrap llama_batch in the future
+typealias LlamaBatchPointer = Long
 
 // Represents a llama token ID
 typealias llama_token = Int
-
-// Concrete parameter class for Desktop/JNI (not expect/actual)
-// Defaults based on llama.cpp C++ defaults.
-data class LlamaModelParams(
-    val nGpuLayers: Int = 0,
-    val mainGpu: Int = 0,
-    val vocabOnly: Boolean = false,
-    val useMmap: Boolean = true,
-    val useMlock: Boolean = false,
-    val checkTensors: Boolean = false
-)
-
-// Concrete parameter class for Desktop/JNI (not expect/actual)
-// Defaults based on llama.cpp C++ defaults.
-data class LlamaContextParams(
-    val nCtx: Int = 512,
-    val nBatch: Int = 2048, // Default from C++
-    val nUbatch: Int = 512,
-    val nSeqMax: Int = 1,
-    val nThreads: Int = 0, // Default 0 allows auto-detection by library
-    val nThreadsBatch: Int = 0, // Default 0 allows auto-detection by library
-    val ropeFreqBase: Float = 0.0f,
-    val ropeFreqScale: Float = 0.0f,
-    val embeddings: Boolean = false,
-    val offloadKqv: Boolean = true,
-    val flashAttn: Boolean = false,
-    val noPerf: Boolean = true // Default from C++
-)
 
 /**
  * Object containing the native JNI method declarations.
@@ -70,12 +42,20 @@ object NativeMethods {
 
     // --- Model Loading ---
     // Uses the concrete LlamaModelParams defined above
-    external fun llama_model_load_from_file(path: String, params: LlamaModelParams): LlamaModelPointer
+    external fun llama_model_load_from_file(
+        path: String,
+        params: LlamaModelParams
+    ): LlamaModelPointer
+
     external fun llama_model_free(model: LlamaModelPointer)
 
     // --- Context Management ---
     // Uses the concrete LlamaContextParams defined above
-    external fun llama_context_init_from_model(model: LlamaModelPointer, params: LlamaContextParams): LlamaContextPointer
+    external fun llama_context_init_from_model(
+        model: LlamaModelPointer,
+        params: LlamaContextParams,
+    ): LlamaContextPointer
+
     external fun llama_context_free(context: LlamaContextPointer)
 
     // --- Context Info ---
