@@ -33,19 +33,26 @@ task.
 4. Apply
 
 ### Compiling
+
 1. Install sdkman https://sdkman.io/install/
 2. Install compatible gradle. For now, recommended version is 8.10
+
 ```bash
 sdk install gradle 8.10
 ```
+
 3. Install JDK, recommended version: 17.0.14-zulu
+
 ```bash
 sdk install java 17.0.14-zulu
 ```
+
 4. Setting up android studio to use gradle and `JAVA_HOME`
-Update the gradle to use local installed version of gradle: /home/<user>/.sdkman/candidates/gradle/current
-Config to use JAVA_HOME version
+   Update the gradle to use local installed version of gradle: /home/<user>
+   /.sdkman/candidates/gradle/current
+   Config to use JAVA_HOME version
 5. If running in Android studio giving error, try to run
+
 ```bash
 gradle composeApp:run
 ```

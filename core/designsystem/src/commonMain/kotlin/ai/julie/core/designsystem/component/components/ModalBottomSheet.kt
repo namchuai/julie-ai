@@ -62,7 +62,10 @@ internal object BottomSheetDefaults {
             modifier =
                 Modifier
                     .padding(DragHandlePadding)
-                    .background(color = Color.Companion.Unspecified, shape = RoundedCornerShape(12.dp)),
+                    .background(
+                        color = Color.Companion.Unspecified,
+                        shape = RoundedCornerShape(12.dp)
+                    ),
         ) {
             Spacer(
                 Modifier

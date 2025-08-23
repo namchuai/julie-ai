@@ -1,8 +1,10 @@
 package ai.julie.feature.chat
 
-import ai.julie.core.designsystem.component.components.Icon
-import ai.julie.core.designsystem.component.components.IconButton
+import ai.julie.core.designsystem.component.AppTheme
 import ai.julie.core.designsystem.component.components.Text
+import ai.julie.feature.message.domain.model.EnrichedMessage
+import ai.julie.feature.message.domain.model.EnrichedRole
+import ai.julie.feature.message.domain.model.extractTextContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,37 +16,35 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Assistant
-import androidx.compose.material.icons.outlined.ContentCopy
-import androidx.compose.material.icons.outlined.Refresh
-import androidx.compose.material.icons.outlined.ThumbDown
-import androidx.compose.material.icons.outlined.ThumbUp
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.mikepenz.markdown.m3.Markdown
+import com.mikepenz.markdown.m3.markdownColor
+import com.mikepenz.markdown.m3.markdownTypography
 
 @Composable
 fun ChatMessageList(
-    modifier: Modifier = Modifier,
-    messages: List<MessageItem>,
+    messages: List<EnrichedMessage>,
 ) {
     LazyColumn(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(vertical = 8.dp)
+            .padding(horizontal = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(vertical = 20.dp)
     ) {
-        items(messages) { message ->
-            if (message.isFromUser) {
+        items(items = messages) { message ->
+            // TODO: handle more rendering type of role
+            if (message.role == EnrichedRole.User) {
                 UserMessageItem(message = message)
             } else {
                 AssistantMessageItem(message = message)
@@ -55,108 +55,106 @@ fun ChatMessageList(
 
 @Composable
 fun UserMessageItem(
-    modifier: Modifier = Modifier,
-    message: MessageItem,
+    message: EnrichedMessage,
 ) {
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(start = 64.dp)
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Text(
-            text = message.content,
+        Box(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
-                .clip(RoundedCornerShape(16.dp))
-                .background(Color(0xFFE3F2FD))
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-        )
+                .widthIn(max = 280.dp)
+                .clip(
+                    RoundedCornerShape(
+                        topStart = 18.dp,
+                        topEnd = 18.dp,
+                        bottomStart = 18.dp,
+                        bottomEnd = 4.dp
+                    )
+                )
+                .background(AppTheme.colors.primary)
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+        ) {
+            SelectionContainer {
+                Text(
+                    text = message.extractTextContent(),
+                    color = AppTheme.colors.onPrimary,
+                    style = AppTheme.typography.body1
+                )
+            }
+        }
     }
 }
 
 @Composable
-fun AssistantMessageItem(message: MessageItem) {
+fun AssistantMessageItem(message: EnrichedMessage) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.Top
     ) {
-        // Assistant avatar
+        // Avatar
         Box(
             modifier = Modifier
-                .size(36.dp)
-                .clip(CircleShape)
-                .background(Color(0xFFE1F5FE)),
+                .size(32.dp)
+                .background(
+                    color = AppTheme.colors.surface,
+                    shape = RoundedCornerShape(8.dp)
+                ),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = Icons.Default.Assistant,
-                contentDescription = "Assistant",
-                tint = Color.Blue
-            )
-        }
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        // Message content
-        Column {
             Text(
-                text = message.content,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-
-            // Reaction buttons
-            MessageReactionButtons()
-        }
-    }
-}
-
-@Composable
-fun MessageReactionButtons() {
-    Row(
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        IconButton(
-            onClick = { /* Handle copy */ },
-            modifier = Modifier.size(32.dp)
-        ) {
-            Icon(
-                Icons.Outlined.ContentCopy,
-                contentDescription = "Copy",
-                modifier = Modifier.size(18.dp)
+                text = "AI",
+                color = AppTheme.colors.primary,
+                style = AppTheme.typography.label2.copy(
+                    fontWeight = FontWeight.Bold
+                )
             )
         }
 
-        IconButton(
-            onClick = { /* Handle regenerate */ },
-            modifier = Modifier.size(32.dp)
-        ) {
-            Icon(
-                Icons.Outlined.Refresh,
-                contentDescription = "Regenerate",
-                modifier = Modifier.size(18.dp)
-            )
-        }
+        Spacer(modifier = Modifier.width(12.dp))
 
-        IconButton(
-            onClick = { /* Handle like */ },
-            modifier = Modifier.size(32.dp)
+        // Message bubble with markdown
+        Column(
+            modifier = Modifier.weight(1f)
         ) {
-            Icon(
-                Icons.Outlined.ThumbUp,
-                contentDescription = "Like",
-                modifier = Modifier.size(18.dp)
-            )
-        }
-
-        IconButton(
-            onClick = { /* Handle dislike */ },
-            modifier = Modifier.size(32.dp)
-        ) {
-            Icon(
-                Icons.Outlined.ThumbDown,
-                contentDescription = "Dislike",
-                modifier = Modifier.size(18.dp)
-            )
+            SelectionContainer {
+                Box(
+                    modifier = Modifier
+                        .widthIn(max = 320.dp)
+                        .clip(
+                            RoundedCornerShape(
+                                topStart = 4.dp,
+                                topEnd = 18.dp,
+                                bottomStart = 18.dp,
+                                bottomEnd = 18.dp
+                            )
+                        )
+                        .background(AppTheme.colors.surface)
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                ) {
+                    Markdown(
+                        content = message.extractTextContent(),
+                        colors = markdownColor(
+                            text = AppTheme.colors.text,
+                            codeText = AppTheme.colors.text,
+                            linkText = AppTheme.colors.primary,
+                            codeBackground = AppTheme.colors.outline.copy(alpha = 0.1f),
+                            dividerColor = AppTheme.colors.outline
+                        ),
+                        typography = markdownTypography(
+                            h1 = AppTheme.typography.h1,
+                            h2 = AppTheme.typography.h2,
+                            h3 = AppTheme.typography.h3,
+                            h4 = AppTheme.typography.h4,
+                            h5 = AppTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
+                            h6 = AppTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
+                            text = AppTheme.typography.body1,
+                            code = AppTheme.typography.body1.copy(fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace),
+                            quote = AppTheme.typography.body1.copy(fontWeight = FontWeight.Medium)
+                        )
+                    )
+                }
+            }
         }
     }
 }

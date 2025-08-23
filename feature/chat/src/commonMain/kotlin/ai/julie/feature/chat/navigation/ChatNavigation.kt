@@ -1,30 +1,20 @@
 package ai.julie.feature.chat.navigation
 
-import ai.julie.feature.chat.ChatScreenRoute
-import ai.julie.feature.chat.ChatViewModel
+import ai.julie.feature.chat.ui.chat.ChatComposable
+import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.navigation
 import kotlinx.serialization.Serializable
-import org.koin.compose.viewmodel.koinViewModel
 
 @Serializable
-data object Chat
+internal class ChatScreen
 
-@Serializable
-internal data object ChatScreen
-
-fun NavGraphBuilder.chatGraph(
-    navController: NavHostController,
-    onModelMarketClick: () -> Unit,
-) {
-    navigation<Chat>(
-        startDestination = ChatScreen,
-    ) {
-        composable<ChatScreen> {
-            val viewModel = koinViewModel<ChatViewModel>()
-            ChatScreenRoute(viewModel)
-        }
+fun NavGraphBuilder.chatGraph() {
+    composable<ChatScreen> {
+        ChatComposable()
     }
+}
+
+fun NavController.navigateToChat() {
+    navigate(route = ChatScreen())
 }

@@ -1,4 +1,3 @@
-
 package ai.julie.core.designsystem.component.foundation
 
 import androidx.compose.foundation.layout.WindowInsets

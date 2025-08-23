@@ -308,7 +308,14 @@ internal object TextFieldDefaults {
         Box(
             Modifier
                 .background(colors.containerColor(enabled, isError, interactionSource).value, shape)
-                .containerOutline(enabled, isError, interactionSource, colors, borderThickness, shape),
+                .containerOutline(
+                    enabled,
+                    isError,
+                    interactionSource,
+                    colors,
+                    borderThickness,
+                    shape
+                ),
         )
     }
 

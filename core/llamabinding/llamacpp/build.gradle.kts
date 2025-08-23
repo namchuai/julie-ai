@@ -36,10 +36,23 @@ tasks.register<Exec>("configureHostCMake") {
     group = "Build Native"
     description = "Configures the host build using CMake."
     workingDir = cmakeSrcDir
-    outputs.dir(hostCmakeBuildDir)
+
+    // Improved input tracking
     inputs.file(project.file("CMakeLists.txt"))
     inputs.dir(project.file("src/llama.cpp"))
     inputs.dir(project.file("src/main/cpp"))
+    inputs.property("buildType", "Release")
+    inputs.property("llamaTests", "OFF")
+    inputs.property("ggmlTests", "OFF")
+
+    // Output tracking
+    outputs.dir(hostCmakeBuildDir)
+    outputs.cacheIf { true } // Enable caching
+
+    // Only run if inputs changed or outputs don't exist
+    onlyIf {
+        !file("$hostCmakeBuildDir/CMakeCache.txt").exists() || inputs.hasInputs
+    }
 
     doFirst {
         Files.createDirectories(Paths.get(hostCmakeBuildDir))
@@ -60,8 +73,42 @@ tasks.register<Exec>("buildHostCMake") {
     description = "Builds the host shared library using CMake."
     dependsOn("configureHostCMake")
     workingDir = project.file(hostCmakeBuildDir)
-    outputs.dir("${hostCmakeBuildDir}/lib") // Adjust if output location differs
-    outputs.dir("${hostCmakeBuildDir}/bin") // Adjust if output location differs
+
+    // Input tracking - the configuration and source files
+    inputs.dir(hostCmakeBuildDir).withPropertyName("cmakeConfig")
+    inputs.dir(project.file("src/llama.cpp")).withPropertyName("llamaSource")
+    inputs.dir(project.file("src/main/cpp")).withPropertyName("jniSource")
+    inputs.property("buildConfig", "Release")
+
+    // Output tracking
+    outputs.dir("${hostCmakeBuildDir}/lib").withPropertyName("libDir")
+    outputs.dir("${hostCmakeBuildDir}/bin").withPropertyName("binDir")
+    outputs.cacheIf { true } // Enable caching
+
+    // Only run if libraries don't exist or inputs changed
+    val libsToCopy = System.getProperty("os.name").lowercase().let {
+        val jniLib = when {
+            it.contains("mac") -> System.mapLibraryName("llama_jni") // libllama_jni.dylib
+            it.contains("linux") -> System.mapLibraryName("llama_jni") // libllama_jni.so  
+            it.contains("win") -> "llama_jni.dll"
+            else -> "libllama_jni.unknown"
+        }
+        listOf(
+            jniLib,
+            System.mapLibraryName("llama"),
+            System.mapLibraryName("ggml"),
+            System.mapLibraryName("ggml-base"),
+            System.mapLibraryName("ggml-cpu"),
+            System.mapLibraryName("ggml-metal"),
+            System.mapLibraryName("ggml-blas")
+        )
+    }
+
+    onlyIf {
+        libsToCopy.any { lib ->
+            !file("${hostCmakeBuildDir}/lib/$lib").exists() && !file("${hostCmakeBuildDir}/bin/$lib").exists()
+        }
+    }
 
     commandLine("/usr/bin/env", "cmake", "--build", ".", "--config", "Release")
 }
@@ -82,17 +129,49 @@ tasks.register<Copy>("copyHostNativeLib") {
             jniLib,
             System.mapLibraryName("llama"),
             System.mapLibraryName("ggml"),
+            System.mapLibraryName("ggml-base"),
+            System.mapLibraryName("ggml-cpu"),
+            System.mapLibraryName("ggml-metal"),
+            System.mapLibraryName("ggml-blas"),
             // Add other host dependencies as needed based on CMake output
         ).filterNotNull()
     }
 
+    val targetDir =
+        project(":composeApp").layout.buildDirectory.dir("processedResources/desktop/main")
+
+    // Input tracking
+    inputs.files(fileTree("${hostCmakeBuildDir}/lib") { include(libsToCopy) })
+    inputs.files(fileTree("${hostCmakeBuildDir}/bin") { include(libsToCopy) })
+
+    // Output tracking  
+    outputs.dir(targetDir)
+    outputs.cacheIf { true } // Enable caching
+
+    // Only run if target files don't exist or source files are newer
+    onlyIf {
+        libsToCopy.any { lib ->
+            val srcLib = file("${hostCmakeBuildDir}/lib/$lib")
+            val srcBin = file("${hostCmakeBuildDir}/bin/$lib")
+            val target = targetDir.get().asFile.resolve(lib)
+
+            val srcFile = when {
+                srcLib.exists() -> srcLib
+                srcBin.exists() -> srcBin
+                else -> null
+            }
+
+            srcFile != null && (!target.exists() || srcFile.lastModified() > target.lastModified())
+        }
+    }
+
     logger.lifecycle("Host libraries to copy: $libsToCopy")
 
-    // Assuming JNI lib is in 'lib' and dependencies are in 'bin' after build
-    from("${hostCmakeBuildDir}/lib") { include(libsToCopy.first()) }
-    from("${hostCmakeBuildDir}/bin") { include(libsToCopy.drop(1)) }
+    // Copy libraries from both lib and bin directories
+    from("${hostCmakeBuildDir}/lib") { include(libsToCopy) }
+    from("${hostCmakeBuildDir}/bin") { include(libsToCopy) }
 
-    into(project(":composeApp").layout.buildDirectory.dir("processedResources/desktop/main"))
+    into(targetDir)
 }
 
 // --- Configuration for Android NDK Build --- (REMOVED - Handled by AGP externalNativeBuild)
