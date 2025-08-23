@@ -1,15 +1,15 @@
 package ai.julie.feature.jinjaparser.data
 
+import ai.julie.feature.jinjaparser.domain.ParseConversation
+import ai.julie.feature.jinjaparser.domain.ProcessChatTemplate
 import ai.julie.feature.message.domain.model.EnrichedMessage
 import ai.julie.feature.message.domain.model.EnrichedRole
 import ai.julie.feature.message.domain.model.extractTextContent
-import ai.julie.core.model.LlamaSamplerSettings
-import ai.julie.feature.jinjaparser.domain.ProcessChatTemplate
 import ai.julie.logging.Logger
-import com.hubspot.jinjava.Jinjava
 import com.aallam.openai.api.chat.Tool
+import com.hubspot.jinjava.Jinjava
 
-actual class JinjaTemplateServiceImpl : ProcessChatTemplate {
+actual class JinjaTemplateServiceImpl : ProcessChatTemplate, ParseConversation {
 
     private val TAG = "JinjaTemplateService"
 
@@ -20,6 +20,7 @@ actual class JinjaTemplateServiceImpl : ProcessChatTemplate {
         bosToken: String?,
         dateString: String?,
         tools: List<Tool>?,
+        builtinTools: List<String>?,
     ): String {
         val context = mutableMapOf<String, Any>()
 
@@ -46,6 +47,11 @@ actual class JinjaTemplateServiceImpl : ProcessChatTemplate {
         if (tools != null) {
             context["tools"] = tools
         }
+        
+        // Add builtin_tools if provided (for Llama 3.1 built-in tools like brave_search)
+        if (builtinTools != null) {
+            context["builtin_tools"] = builtinTools
+        }
 
         // Add conversation history as separate variables
         val userMessages = messages.filter { it.role == EnrichedRole.User }.map { it.content }
@@ -65,5 +71,12 @@ actual class JinjaTemplateServiceImpl : ProcessChatTemplate {
             // Return original template if processing fails
             template
         }
+    }
+
+    override fun parseConversation(
+        messages: List<EnrichedMessage>,
+        context: Map<String, Any>
+    ) {
+        TODO("Not yet implemented")
     }
 }

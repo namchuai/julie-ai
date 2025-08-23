@@ -75,6 +75,7 @@ import ai.julie.feature.modelconfig.domain.gguf.tokenizer.ggml.specialtokens.Pad
 import ai.julie.feature.modelconfig.domain.gguf.tokenizer.ggml.specialtokens.SeparatorToken
 import ai.julie.feature.modelconfig.domain.gguf.tokenizer.ggml.specialtokens.UnknownToken
 import ai.julie.feature.modelconfig.domain.gguf.tokenizer.other.ChatTemplate
+import ai.julie.logging.Logger
 import kotbase.Document
 import kotbase.MutableArray
 import kotbase.MutableDocument
@@ -269,14 +270,30 @@ data class Deepseek2ModelMetadata(
     }
 
     companion object Companion {
+        private const val TAG = "Deepseek2ModelMetadata"
+        
         fun fromDocument(document: Document): Deepseek2ModelMetadata {
             val deepseek2Arch = SupportedArchitecture.DEEPSEEK2
+            
+            Logger.d("[$TAG] Starting document parsing for architecture: ${deepseek2Arch.value}")
+            Logger.d("[$TAG] Document keys: ${document.keys}")
 
-            return Deepseek2ModelMetadata(
-                quantizationVersion = QuantizationVersion(
+            return try {
+                Logger.d("[$TAG] Parsing quantizationVersion...")
+                val quantizationVersion = QuantizationVersion(
                     document.getInt(QuantizationVersion.KEY).toUInt()
-                ),
-                alignment = Alignment(document.getInt(Alignment.KEY).toUInt()),
+                )
+                Logger.d("[$TAG] quantizationVersion: ${quantizationVersion.value}")
+                
+                Logger.d("[$TAG] Parsing alignment...")
+                val alignment = Alignment(document.getInt(Alignment.KEY).toUInt())
+                Logger.d("[$TAG] alignment: ${alignment.value}")
+                
+                Logger.d("[$TAG] Parsing general fields...")
+                
+                Deepseek2ModelMetadata(
+                quantizationVersion = quantizationVersion,
+                alignment = alignment,
 
                 // General Information fields - Optional
                 name = document.getString(Name.KEY)?.let { Name(it) },
@@ -308,38 +325,67 @@ data class Deepseek2ModelMetadata(
                 url = document.getString(Url.KEY)?.let { Url(it) },
                 uuid = document.getString(Uuid.KEY)?.let { Uuid(it) },
 
-                // Source Information fields - Optional (BaseModel classes need IDs, but we don't know the exact structure from Document)
-                baseModelAuthor = null, // TODO: BaseModel fields require ID parameter - complex to parse from Document
-                baseModelCount = null, // TODO: BaseModel fields require ID parameter - complex to parse from Document  
-                baseModelDoi = null, // TODO: BaseModel fields require ID parameter - complex to parse from Document
-                baseModelName = null, // TODO: BaseModel fields require ID parameter - complex to parse from Document
-                baseModelOrganization = null, // TODO: BaseModel fields require ID parameter - complex to parse from Document
-                baseModelRepoUrl = null, // TODO: BaseModel fields require ID parameter - complex to parse from Document
-                baseModelUrl = null, // TODO: BaseModel fields require ID parameter - complex to parse from Document
-                baseModelUuid = null, // TODO: BaseModel fields require ID parameter - complex to parse from Document
-                baseModelVersion = null, // TODO: BaseModel fields require ID parameter - complex to parse from Document
+                // Source Information fields - Optional
+                // BaseModelCount doesn't need an ID
+                baseModelCount = document.getLong(BaseModelCount.KEY)
+                    .takeIf { it != 0L }?.let { BaseModelCount(it.toUInt()) },
+                // TODO: In the future, update the base data class to accept a list of base models 
+                // when general.base_model.count > 1
+                // For now, we only get the first base model (ID "0" or "1")
+                baseModelAuthor = (document.getString("general.base_model.0.author") 
+                    ?: document.getString("general.base_model.1.author"))
+                    ?.let { BaseModelAuthor("0", it) },
+                baseModelDoi = (document.getString("general.base_model.0.doi")
+                    ?: document.getString("general.base_model.1.doi"))
+                    ?.let { BaseModelDoi("0", it) },
+                baseModelName = (document.getString("general.base_model.0.name")
+                    ?: document.getString("general.base_model.1.name"))
+                    ?.let { BaseModelName("0", it) },
+                baseModelOrganization = (document.getString("general.base_model.0.organization")
+                    ?: document.getString("general.base_model.1.organization"))
+                    ?.let { BaseModelOrganization("0", it) },
+                baseModelRepoUrl = (document.getString("general.base_model.0.repo_url")
+                    ?: document.getString("general.base_model.1.repo_url"))
+                    ?.let { BaseModelRepoUrl("0", it) },
+                baseModelUrl = (document.getString("general.base_model.0.url")
+                    ?: document.getString("general.base_model.1.url"))
+                    ?.let { BaseModelUrl("0", it) },
+                baseModelUuid = (document.getString("general.base_model.0.uuid")
+                    ?: document.getString("general.base_model.1.uuid"))
+                    ?.let { BaseModelUuid("0", it) },
+                baseModelVersion = (document.getString("general.base_model.0.version")
+                    ?: document.getString("general.base_model.1.version"))
+                    ?.let { BaseModelVersion("0", it) },
                 sourceDoi = document.getString(SourceDoi.KEY)?.let { SourceDoi(it) },
                 sourceRepoUrl = document.getString(SourceRepoUrl.KEY)?.let { SourceRepoUrl(it) },
                 sourceUrl = document.getString(SourceUrl.KEY)?.let { SourceUrl(it) },
                 sourceUuid = document.getString(SourceUuid.KEY)?.let { SourceUuid(it) },
 
                 // LLM-specific properties - Some mandatory for DEEPSEEK2
-                contextLength = ContextLength(
-                    deepseek2Arch,
-                    document.getLong("${deepseek2Arch.value}.context_length").toULong()
-                ),
-                embeddingLength = EmbeddingLength(
-                    deepseek2Arch,
-                    document.getLong("${deepseek2Arch.value}.embedding_length").toULong()
-                ),
-                blockCount = BlockCount(
-                    deepseek2Arch,
-                    document.getLong("${deepseek2Arch.value}.block_count").toULong()
-                ),
-                feedForwardLength = FeedForwardLength(
-                    deepseek2Arch,
-                    document.getLong("${deepseek2Arch.value}.feed_forward_length").toULong()
-                ),
+                contextLength = run {
+                    Logger.d("[$TAG] Parsing contextLength with key: ${deepseek2Arch.value}.context_length")
+                    val value = document.getLong("${deepseek2Arch.value}.context_length")
+                    Logger.d("[$TAG] contextLength raw value: $value")
+                    ContextLength(deepseek2Arch, value.toULong())
+                },
+                embeddingLength = run {
+                    Logger.d("[$TAG] Parsing embeddingLength with key: ${deepseek2Arch.value}.embedding_length")
+                    val value = document.getLong("${deepseek2Arch.value}.embedding_length")
+                    Logger.d("[$TAG] embeddingLength raw value: $value")
+                    EmbeddingLength(deepseek2Arch, value.toULong())
+                },
+                blockCount = run {
+                    Logger.d("[$TAG] Parsing blockCount with key: ${deepseek2Arch.value}.block_count")
+                    val value = document.getLong("${deepseek2Arch.value}.block_count")
+                    Logger.d("[$TAG] blockCount raw value: $value")
+                    BlockCount(deepseek2Arch, value.toULong())
+                },
+                feedForwardLength = run {
+                    Logger.d("[$TAG] Parsing feedForwardLength with key: ${deepseek2Arch.value}.feed_forward_length")
+                    val value = document.getLong("${deepseek2Arch.value}.feed_forward_length")
+                    Logger.d("[$TAG] feedForwardLength raw value: $value")
+                    FeedForwardLength(deepseek2Arch, value.toULong())
+                },
                 useParallelResidual = document.getString("${deepseek2Arch.value}.use_parallel_residual")
                     ?.let { UseParallelResidual(deepseek2Arch, it.toBoolean()) },
                 tensorDataLayout = document.getString("${deepseek2Arch.value}.tensor_data_layout")
@@ -350,10 +396,12 @@ data class Deepseek2ModelMetadata(
                     .takeIf { it != 0L }?.let { ExpertUsedCount(deepseek2Arch, it.toUInt()) },
 
                 // Attention-specific properties - Some mandatory for DEEPSEEK2
-                headCount = HeadCount(
-                    deepseek2Arch,
-                    document.getLong("${deepseek2Arch.value}.attention.head_count").toULong()
-                ),
+                headCount = run {
+                    Logger.d("[$TAG] Parsing headCount with key: ${deepseek2Arch.value}.attention.head_count")
+                    val value = document.getLong("${deepseek2Arch.value}.attention.head_count")
+                    Logger.d("[$TAG] headCount raw value: $value")
+                    HeadCount(deepseek2Arch, value.toULong())
+                },
                 headCountKv = document.getLong("${deepseek2Arch.value}.attention.head_count_kv")
                     .takeIf { it != 0L }?.let { HeadCountKv(deepseek2Arch, it.toULong()) },
                 maxAlibiBias = document.getFloat("${deepseek2Arch.value}.attention.max_alibi_bias")
@@ -362,20 +410,28 @@ data class Deepseek2ModelMetadata(
                     .takeIf { it != 0f }?.let { ClampKqv(deepseek2Arch, it) },
                 layerNormEpsilon = document.getFloat("${deepseek2Arch.value}.attention.layer_norm_epsilon")
                     .takeIf { it != 0f }?.let { LayerNormEpsilon(deepseek2Arch, it) },
-                layerNormRmsEpsilon = LayerNormRmsEpsilon(
-                    deepseek2Arch,
-                    document.getFloat("${deepseek2Arch.value}.attention.layer_norm_rms_epsilon")
-                ),
+                layerNormRmsEpsilon = run {
+                    Logger.d("[$TAG] Parsing layerNormRmsEpsilon with key: ${deepseek2Arch.value}.attention.layer_norm_rms_epsilon")
+                    val value = document.getFloat("${deepseek2Arch.value}.attention.layer_norm_rms_epsilon")
+                    Logger.d("[$TAG] layerNormRmsEpsilon raw value: $value")
+                    LayerNormRmsEpsilon(deepseek2Arch, value)
+                },
                 keyLength = document.getLong("${deepseek2Arch.value}.attention.key_length")
                     .takeIf { it != 0L }?.let { KeyLength(deepseek2Arch, it.toUInt()) },
                 valueLength = document.getLong("${deepseek2Arch.value}.attention.value_length")
                     .takeIf { it != 0L }?.let { ValueLength(deepseek2Arch, it.toUInt()) },
 
                 // RoPE-specific properties - Some mandatory for DEEPSEEK2
-                ropeDimensionCount = DimensionCount(
-                    deepseek2Arch,
-                    document.getLong("${deepseek2Arch.value}.rope.dimension_count").toULong()
-                ),
+                ropeDimensionCount = run {
+                    Logger.d("[$TAG] Parsing ropeDimensionCount with key: ${deepseek2Arch.value}.rope.dimension_count")
+                    val value = document.getLong("${deepseek2Arch.value}.rope.dimension_count")
+                    Logger.d("[$TAG] ropeDimensionCount raw value: $value")
+                    if (value != 0L) {
+                        DimensionCount(deepseek2Arch, value.toULong())
+                    } else {
+                        null
+                    }
+                },
                 ropeFreqBase = document.getFloat("${deepseek2Arch.value}.rope.freq_base")
                     .takeIf { it != 0f }?.let { FreqBase(deepseek2Arch, it) },
                 ropeScaleLinear = document.getFloat("${deepseek2Arch.value}.rope.scale_linear")
@@ -412,6 +468,11 @@ data class Deepseek2ModelMetadata(
                 separatorToken = document.getString(SeparatorToken.KEY)?.let { SeparatorToken(it) },
                 unknownToken = document.getString(UnknownToken.KEY)?.let { UnknownToken(it) }
             )
+            } catch (e: Exception) {
+                Logger.e("[$TAG] Error parsing document to Deepseek2ModelMetadata: ${e.message}")
+                Logger.e("[$TAG] Exception stack trace: ${e.stackTraceToString()}")
+                throw e
+            }
         }
     }
 }

@@ -1,10 +1,9 @@
 package ai.julie.feature.jinjaparser.data
 
+import ai.julie.feature.jinjaparser.domain.ProcessChatTemplate
 import ai.julie.feature.message.domain.model.EnrichedMessage
 import ai.julie.feature.message.domain.model.EnrichedRole
 import ai.julie.feature.message.domain.model.extractTextContent
-import ai.julie.core.model.LlamaSamplerSettings
-import ai.julie.feature.jinjaparser.domain.ProcessChatTemplate
 import ai.julie.logging.Logger
 import com.aallam.openai.api.chat.Tool
 
@@ -19,6 +18,7 @@ actual class JinjaTemplateServiceImpl : ProcessChatTemplate {
         bosToken: String?,
         dateString: String?,
         tools: List<Tool>?,
+        builtinTools: List<String>?,
     ): String {
         // Simple template processing for iOS without jinjava
         // This is a basic implementation that handles simple variable substitution

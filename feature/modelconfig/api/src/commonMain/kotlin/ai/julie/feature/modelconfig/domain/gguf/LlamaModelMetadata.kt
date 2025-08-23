@@ -296,16 +296,37 @@ data class LlamaModelMetadata(
                 url = document.getString(Url.KEY)?.let { Url(it) },
                 uuid = document.getString(Uuid.KEY)?.let { Uuid(it) },
                 
-                // Source Information fields - Optional (BaseModel classes need IDs, but we don't know the exact structure from Document)
-                baseModelAuthor = null, // TODO: BaseModel fields require ID parameter - complex to parse from Document
-                baseModelCount = null, // TODO: BaseModel fields require ID parameter - complex to parse from Document  
-                baseModelDoi = null, // TODO: BaseModel fields require ID parameter - complex to parse from Document
-                baseModelName = null, // TODO: BaseModel fields require ID parameter - complex to parse from Document
-                baseModelOrganization = null, // TODO: BaseModel fields require ID parameter - complex to parse from Document
-                baseModelRepoUrl = null, // TODO: BaseModel fields require ID parameter - complex to parse from Document
-                baseModelUrl = null, // TODO: BaseModel fields require ID parameter - complex to parse from Document
-                baseModelUuid = null, // TODO: BaseModel fields require ID parameter - complex to parse from Document
-                baseModelVersion = null, // TODO: BaseModel fields require ID parameter - complex to parse from Document
+                // Source Information fields - Optional
+                // BaseModelCount doesn't need an ID
+                baseModelCount = document.getLong(BaseModelCount.KEY)
+                    .takeIf { it != 0L }?.let { BaseModelCount(it.toUInt()) },
+                // TODO: In the future, update the base data class to accept a list of base models 
+                // when general.base_model.count > 1
+                // For now, we only get the first base model (ID "0" or "1")
+                baseModelAuthor = (document.getString("general.base_model.0.author") 
+                    ?: document.getString("general.base_model.1.author"))
+                    ?.let { BaseModelAuthor("0", it) },
+                baseModelDoi = (document.getString("general.base_model.0.doi")
+                    ?: document.getString("general.base_model.1.doi"))
+                    ?.let { BaseModelDoi("0", it) },
+                baseModelName = (document.getString("general.base_model.0.name")
+                    ?: document.getString("general.base_model.1.name"))
+                    ?.let { BaseModelName("0", it) },
+                baseModelOrganization = (document.getString("general.base_model.0.organization")
+                    ?: document.getString("general.base_model.1.organization"))
+                    ?.let { BaseModelOrganization("0", it) },
+                baseModelRepoUrl = (document.getString("general.base_model.0.repo_url")
+                    ?: document.getString("general.base_model.1.repo_url"))
+                    ?.let { BaseModelRepoUrl("0", it) },
+                baseModelUrl = (document.getString("general.base_model.0.url")
+                    ?: document.getString("general.base_model.1.url"))
+                    ?.let { BaseModelUrl("0", it) },
+                baseModelUuid = (document.getString("general.base_model.0.uuid")
+                    ?: document.getString("general.base_model.1.uuid"))
+                    ?.let { BaseModelUuid("0", it) },
+                baseModelVersion = (document.getString("general.base_model.0.version")
+                    ?: document.getString("general.base_model.1.version"))
+                    ?.let { BaseModelVersion("0", it) },
                 sourceDoi = document.getString(SourceDoi.KEY)?.let { SourceDoi(it) },
                 sourceRepoUrl = document.getString(SourceRepoUrl.KEY)?.let { SourceRepoUrl(it) },
                 sourceUrl = document.getString(SourceUrl.KEY)?.let { SourceUrl(it) },

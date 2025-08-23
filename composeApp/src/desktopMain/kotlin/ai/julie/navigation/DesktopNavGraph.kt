@@ -6,6 +6,7 @@ import ai.julie.panel.chat.ChatPanel
 import ai.julie.panel.modelmanagement.ModelManagementPanel
 import ai.julie.panel.promptlab.PromptLabPanel
 import ai.julie.panel.setting.SettingPanel
+import ai.julie.panel.toolmanagement.ToolPanel
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -26,6 +27,7 @@ enum class DesktopDestination(val title: String) {
     Chat("Chat"),
     PromptLab("Prompt Lab"),
     ModelManagement("Models"),
+    ToolManagement("Tools"),
     Setting("Setting"),
     Python("Python");
 }
@@ -53,6 +55,7 @@ fun DesktopNavGraph() {
                 DesktopDestination.ModelManagement -> ModelManagementPanel(
                     onNavigateToChat = { selectedDestination = DesktopDestination.Chat }
                 )
+                DesktopDestination.ToolManagement -> ToolPanel()
                 DesktopDestination.Setting -> SettingPanel()
                 DesktopDestination.Python -> PythonPanelContainer()
             }

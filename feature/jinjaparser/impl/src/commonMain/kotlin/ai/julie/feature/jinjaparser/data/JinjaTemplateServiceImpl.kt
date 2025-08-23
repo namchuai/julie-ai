@@ -12,5 +12,6 @@ expect class JinjaTemplateServiceImpl() : ProcessChatTemplate {
         bosToken: String?,
         dateString: String?,
         tools: List<Tool>?,
+        builtinTools: List<String>?,
     ): String
 }

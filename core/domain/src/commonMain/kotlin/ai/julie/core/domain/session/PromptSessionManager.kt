@@ -1,16 +1,15 @@
 package ai.julie.core.domain.session
 
 import ai.julie.core.data.llama.Promptable
-import ai.julie.core.model.LlamaSamplerSettings
 import ai.julie.feature.jinjaparser.domain.ProcessChatTemplate
 import ai.julie.feature.message.domain.model.EnrichedMessage
 import ai.julie.feature.modelconfig.domain.preset.SamplingPreset
 import ai.julie.logging.Logger
+import com.aallam.openai.api.chat.Tool
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onCompletion
-import com.aallam.openai.api.chat.Tool
 
 interface PromptSessionManager {
 
@@ -33,6 +32,7 @@ interface PromptSessionManager {
         bosToken: String? = null,
         dateString: String? = null,
         tools: List<Tool>? = null,
+        builtinTools: List<String>? = null,
     ): Flow<String>
 
     suspend fun cancelSession(threadId: String): Boolean
@@ -98,6 +98,7 @@ class PromptSessionManagerImpl(
         bosToken: String?,
         dateString: String?,
         tools: List<Tool>?,
+        builtinTools: List<String>?,
     ): Flow<String> {
         val session = activeSessions[threadId]
         require(session != null) { "No active session found for thread $threadId. Start a session first." }
@@ -113,6 +114,7 @@ class PromptSessionManagerImpl(
             bosToken = bosToken,
             dateString = dateString,
             tools = tools,
+            builtinTools = builtinTools,
         ).onCompletion {
             // Update state when completed
             sessionStates[threadId]?.value = when (session.getState()) {

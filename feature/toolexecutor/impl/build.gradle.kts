@@ -11,6 +11,7 @@ kotlin {
             implementation(projects.core.model)
             implementation(projects.core.logging)
             implementation(projects.core.data)
+            implementation(projects.core.network)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.koin.core)
@@ -21,6 +22,8 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(projects.core.designsystem)
             implementation(projects.core.common)
+            implementation(libs.bundles.ktor.common)
+            implementation(libs.kotlinx.serialization.json)
         }
 
         desktopMain.dependencies {

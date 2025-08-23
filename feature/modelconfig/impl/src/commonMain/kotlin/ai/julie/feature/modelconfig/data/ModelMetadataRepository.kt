@@ -43,6 +43,9 @@ class ModelMetadataRepository private constructor(
             val document = collection.getDocument(modelId)
                 ?: throw IllegalStateException("Model metadata not found for modelId: $modelId")
             
+            Logger.d("[$TAG] Document content for modelId $modelId:")
+            Logger.d("[$TAG] Document JSON: ${document.toJSON()}")
+            
             val metadata = GgufMetadataFactory.fromDocument(document)
 
             emit(metadata)

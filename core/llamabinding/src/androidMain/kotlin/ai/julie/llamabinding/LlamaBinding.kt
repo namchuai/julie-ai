@@ -39,18 +39,11 @@ actual class LlamaBinding {
     ) {
         require(!(modelPath.isBlank())) { "Model path is blank. Ensure the caller provides a valid path." }
 
-        modelPtr = if (progressCallback != null) {
-            NativeMethods.llama_model_load_from_file_with_progress(
-                modelPath,
-                LlamaModelParams.from(modelLoadParams),
-                progressCallback
-            )
-        } else {
-            NativeMethods.llama_model_load_from_file(
-                modelPath,
-                LlamaModelParams.from(modelLoadParams),
-            )
-        }
+        modelPtr = NativeMethods.llama_model_load_from_file_with_progress(
+            modelPath,
+            LlamaModelParams.from(modelLoadParams),
+            progressCallback
+        )
 
         if (modelPtr == 0L) {
             logMessage("Failed to load Llama model from path: $modelPath", isError = true)

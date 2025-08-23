@@ -37,6 +37,7 @@ class PromptSession(
         bosToken: String? = null,
         dateString: String? = null,
         tools: List<Tool>? = null,
+        builtinTools: List<String>? = null,
     ): Flow<String> = flow {
         Logger.d("PromptSession[$threadId]: Starting prompt with model $modelId")
 
@@ -49,6 +50,7 @@ class PromptSession(
                 bosToken = bosToken,
                 dateString = dateString,
                 tools = tools,
+                builtinTools = builtinTools,
             )
         } else {
             (messages.lastOrNull()?.message?.content?.firstOrNull() as? MessageContent.Text)?.text?.value

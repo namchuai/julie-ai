@@ -39,17 +39,11 @@ actual class LlamaBinding {
         println("Loading model from: $modelPath with provided params...")
         println("ModelContextParams: nCtx=${modelContextParams.nCtx}, nBatch=${modelContextParams.nBatch}, nUbatch=${modelContextParams.nUbatch}")
         println("LlamaContextParams: nCtx=${llamaContextParams.nCtx}, nBatch=${llamaContextParams.nBatch}, nUbatch=${llamaContextParams.nUbatch}")
-        modelPtr = if (progressCallback != null) {
-            println("Loading model with progress..")
-            NativeMethods.llama_model_load_from_file_with_progress(
-                modelPath,
-                llamaModelParams,
-                progressCallback
-            )
-        } else {
-            println("Loading model without progress..")
-            NativeMethods.llama_model_load_from_file(modelPath, llamaModelParams)
-        }
+        modelPtr = NativeMethods.llama_model_load_from_file_with_progress(
+            modelPath,
+            llamaModelParams,
+            progressCallback
+        )
 
         require(modelPtr != 0L) { "Failed to load Llama model from path: $modelPath" }
 
@@ -348,6 +342,99 @@ actual class LlamaBinding {
         return NativeMethods.llama_model_n_embd(modelPtr)
     }
 
+    // Direct llama.cpp function wrappers - minimal logic, pragmatic names
+    
+    actual fun tokenize(text: String, maxTokens: Int, addBos: Boolean): IntArray {
+        if (modelPtr == 0L) throw LlamaContextException.ModelNotLoadedException()
+        
+        val tokens = IntArray(maxTokens)
+        val nTokens = NativeMethods.llama_tokenize(
+            model = modelPtr,
+            text = text,
+            tokens = tokens,
+            n_max_tokens = maxTokens,
+            add_bos = addBos,
+            special = true
+        )
+        
+        if (nTokens < 0) throw LlamaContextException.TokenizationFailedException(nTokens, text.length)
+        return tokens.copyOf(nTokens)
+    }
+    
+    actual fun createBatch(maxTokens: Int): Long {
+        return NativeMethods.llama_batch_init(maxTokens, 0, 1)
+    }
+    
+    actual fun freeBatch(batch: Long) {
+        NativeMethods.llama_batch_free(batch)
+    }
+    
+    actual fun clearBatch(batch: Long) {
+        NativeMethods.llama_batch_clear(batch)
+    }
+    
+    actual fun setBatchToken(batch: Long, index: Int, tokenId: Int) {
+        NativeMethods.llama_batch_set_token(batch, index, tokenId)
+    }
+    
+    actual fun setBatchPosition(batch: Long, index: Int, position: Int) {
+        NativeMethods.llama_batch_set_pos(batch, index, position)
+    }
+    
+    actual fun setBatchSequenceId(batch: Long, index: Int, seqId: Int) {
+        NativeMethods.llama_batch_set_seq_id(batch, index, seqId)
+    }
+    
+    actual fun setBatchLogits(batch: Long, index: Int, needLogits: Boolean) {
+        NativeMethods.llama_batch_set_logits(batch, index, needLogits)
+    }
+    
+    actual fun setBatchSize(batch: Long, nTokens: Int) {
+        NativeMethods.llama_batch_set_n_tokens(batch, nTokens)
+    }
+    
+    actual fun decode(batch: Long): Int {
+        if (ctxPtr == 0L) throw LlamaContextException.ContextNotInitializedException()
+        return NativeMethods.llama_decode(ctxPtr, batch)
+    }
+    
+    actual fun getLogits(index: Int): FloatArray? {
+        if (ctxPtr == 0L) throw LlamaContextException.ContextNotInitializedException()
+        return NativeMethods.llama_get_logits_ith(ctxPtr, index)
+    }
+    
+    actual fun tokenToText(tokenId: Int): String {
+        if (modelPtr == 0L) throw LlamaContextException.ModelNotLoadedException()
+        
+        val buffer = ByteArray(32)
+        val nBytes = NativeMethods.llama_token_to_piece(modelPtr, tokenId, buffer, buffer.size)
+        
+        return if (nBytes > 0) {
+            buffer.copyOfRange(0, nBytes).toString(Charsets.UTF_8)
+        } else {
+            ""
+        }
+    }
+    
+    actual fun getBosToken(): Int {
+        if (modelPtr == 0L) throw LlamaContextException.ModelNotLoadedException()
+        return NativeMethods.llama_token_bos(modelPtr)
+    }
+    
+    actual fun getEosToken(): Int {
+        if (modelPtr == 0L) throw LlamaContextException.ModelNotLoadedException()
+        return NativeMethods.llama_token_eos(modelPtr)
+    }
+    
+    actual fun clearKvCache(seqId: Int, start: Int, end: Int) {
+        if (ctxPtr == 0L) throw LlamaContextException.ContextNotInitializedException()
+        NativeMethods.llama_kv_cache_rm(ctxPtr, seqId, start, end)
+    }
+    
+    actual fun sampleNextToken(logits: FloatArray, samplerSettings: LlamaSamplerSettings): Int {
+        return sampleToken(logits, samplerSettings) // Use existing implementation
+    }
+
     actual fun getModelDescription(): String {
         if (modelPtr == 0L) throw LlamaContextException.ModelNotLoadedException()
         val bufferSize = 256
@@ -364,10 +451,10 @@ actual class LlamaBinding {
 
     actual suspend fun recreateContext(newContextParams: ModelContextParams) {
         if (modelPtr == 0L) throw LlamaContextException.ModelNotLoadedException()
-        
+
         println("Recreating context with new parameters...")
         println("New params: nCtx=${newContextParams.nCtx}, nBatch=${newContextParams.nBatch}, nUbatch=${newContextParams.nUbatch}")
-        
+
         // Free existing context if it exists
         if (ctxPtr != 0L) {
             println("Freeing existing context (pointer: $ctxPtr)...")
@@ -375,16 +462,16 @@ actual class LlamaBinding {
             ctxPtr = 0
             println("Existing context freed.")
         }
-        
+
         // Create new context with updated parameters
         val llamaContextParams = LlamaContextParams.from(newContextParams)
         println("Creating new context with updated params...")
         ctxPtr = NativeMethods.llama_context_init_from_model(modelPtr, llamaContextParams)
-        
+
         require(ctxPtr != 0L) {
             "Failed to recreate Llama context with new parameters"
         }
-        
+
         println("Context recreated successfully (pointer: $ctxPtr).")
         println("New context size: ${NativeMethods.llama_n_ctx(ctxPtr)} tokens")
     }

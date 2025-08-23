@@ -11,6 +11,7 @@ import ai.julie.feature.modelmarket.di.modelMarketModule
 import ai.julie.feature.promptlab.di.promptLabModule
 import ai.julie.feature.pythonrunner.di.pythonRunnerModule
 import ai.julie.feature.thread.di.threadModule
+import ai.julie.feature.toolmanagement.di.toolManagementModule
 import ai.julie.panel.chat.ChatPanelViewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
@@ -25,6 +26,7 @@ val appModule = module {
     includes(modelMarketModule)
     includes(modelManagementModule)
     includes(promptLabModule)
+    includes(toolManagementModule)
     includes(pythonRunnerModule)
     includes(hardwareMonitorModule)
 

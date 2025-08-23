@@ -6,6 +6,7 @@ import ai.julie.core.common.viewModelState
 import ai.julie.core.domain.session.FlowOfPromptSession
 import ai.julie.core.domain.session.PromptSessionState
 import ai.julie.feature.chat.domain.LocalInferenceUseCase
+import ai.julie.feature.chat.domain.SimpleInferenceUseCase
 import ai.julie.feature.message.domain.CreateMessage
 import ai.julie.feature.message.domain.model.EnrichedRole
 import ai.julie.feature.modelconfig.domain.FlowOfSamplingPresets
@@ -32,7 +33,11 @@ class ChatInputViewModel(
     private val flowOfPromptSession: FlowOfPromptSession,
     private val createMessage: CreateMessage,
     private val localInferenceUseCase: LocalInferenceUseCase,
+    private val simpleInferenceUseCase: SimpleInferenceUseCase,
 ) : ViewModel() {
+
+    // Flag to switch between implementations - set to true to use new orchestrator approach
+    private val useNewInferenceApproach = true
 
     val state = viewModelState(
         initialState = ChatInputState(message = ""),
@@ -90,11 +95,21 @@ class ChatInputViewModel(
                 it.copy(message = "")
             }
 
-            localInferenceUseCase.invoke(
-                threadId = thread.id,
-                modelId = thread.modelId,
-                samplingPreset = selectedSamplingPreset!!,
-            )
+            if (useNewInferenceApproach) {
+                // Use the new orchestrator-based approach
+                simpleInferenceUseCase.invoke(
+                    threadId = thread.id,
+                    modelId = thread.modelId,
+                    samplingPreset = selectedSamplingPreset!!,
+                )
+            } else {
+                // Use the old approach
+                localInferenceUseCase.invoke(
+                    threadId = thread.id,
+                    modelId = thread.modelId,
+                    samplingPreset = selectedSamplingPreset!!,
+                )
+            }
         }
     }
 

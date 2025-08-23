@@ -47,6 +47,7 @@ kotlin {
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
+            implementation(compose.material3)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(compose.materialIconsExtended)
@@ -54,6 +55,8 @@ kotlin {
             implementation(projects.core.model)
             implementation(projects.feature.thread.api)
             implementation(projects.feature.thread.impl)
+            implementation(projects.feature.toolmanagement.api)
+            implementation(projects.feature.toolmanagement.impl)
             implementation(projects.feature.modelconfig.impl)
             implementation(projects.feature.chat)
             implementation(projects.feature.modelmarket)

@@ -10,6 +10,8 @@ kotlin {
             
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.navigation.compose)
+            implementation(libs.openai.client)
+            implementation(libs.kotlinx.datetime)
         }
     }
 }

@@ -40,13 +40,6 @@ object NativeMethods {
     external fun llama_backend_init()
     external fun llama_backend_free()
 
-    // --- Model Loading ---
-    // Uses the concrete LlamaModelParams defined above
-    external fun llama_model_load_from_file(
-        path: String,
-        params: LlamaModelParams
-    ): LlamaModelPointer
-
     // Model loading with progress callback
     external fun llama_model_load_from_file_with_progress(
         path: String,
