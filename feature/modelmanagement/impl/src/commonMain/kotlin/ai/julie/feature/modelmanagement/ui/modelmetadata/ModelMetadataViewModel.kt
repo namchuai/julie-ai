@@ -9,6 +9,8 @@ import ai.julie.core.common.viewModelState
 import ai.julie.feature.modelconfig.domain.FlowOfModelMetadata
 import ai.julie.feature.modelconfig.domain.gguf.GgufMetadata
 import ai.julie.feature.modelconfig.domain.gguf.LlamaModelMetadata
+import ai.julie.feature.modelconfig.domain.gguf.qwen3.Qwen3MoeModelMetadata
+import ai.julie.feature.modelconfig.domain.gguf.deepseek2.Deepseek2ModelMetadata
 import ai.julie.feature.thread.domain.FlowOfActiveThread
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -276,16 +278,17 @@ class ModelMetadataViewModel(
                 )
             }
 
-            // If this is LlamaModelMetadata, show LLAMA-specific fields
-            if (metadata is LlamaModelMetadata) {
-                // LLM-specific properties
-                add(
-                    MetadataItem.PlainText(
-                        key = "Context Length",
-                        value = metadata.contextLength.value.toString()
+            // Show LLM-specific fields for all supported model types
+            when (metadata) {
+                is LlamaModelMetadata -> {
+                    // LLM-specific properties
+                    add(
+                        MetadataItem.PlainText(
+                            key = "Context Length",
+                            value = metadata.contextLength.value.toString()
+                        )
                     )
-                )
-                add(
+                    add(
                     MetadataItem.PlainText(
                         key = "Embedding Length",
                         value = metadata.embeddingLength.value.toString()
@@ -541,6 +544,419 @@ class ModelMetadataViewModel(
                 }
                 metadata.unknownToken?.let {
                     add(MetadataItem.PlainText(key = "Unknown Token", value = it.value))
+                }
+            }
+                is Qwen3MoeModelMetadata -> {
+                    // LLM-specific properties
+                    add(
+                        MetadataItem.PlainText(
+                            key = "Context Length",
+                            value = metadata.contextLength.value.toString()
+                        )
+                    )
+                    add(
+                        MetadataItem.PlainText(
+                            key = "Embedding Length",
+                            value = metadata.embeddingLength.value.toString()
+                        )
+                    )
+                    add(
+                        MetadataItem.PlainText(
+                            key = "Block Count",
+                            value = metadata.blockCount.value.toString()
+                        )
+                    )
+                    add(
+                        MetadataItem.PlainText(
+                            key = "Feed Forward Length",
+                            value = metadata.feedForwardLength.value.toString()
+                        )
+                    )
+                    metadata.expertCount?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "Expert Count",
+                                value = it.value.toString()
+                            )
+                        )
+                    }
+                    metadata.expertUsedCount?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "Expert Used Count",
+                                value = it.value.toString()
+                            )
+                        )
+                    }
+                    
+                    // Attention properties
+                    add(
+                        MetadataItem.PlainText(
+                            key = "Head Count",
+                            value = metadata.headCount.value.toString()
+                        )
+                    )
+                    metadata.headCountKv?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "Key Value Head Count",
+                                value = it.value.toString()
+                            )
+                        )
+                    }
+                    metadata.keyLength?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "Key Length",
+                                value = it.value.toString()
+                            )
+                        )
+                    }
+                    metadata.valueLength?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "Value Length",
+                                value = it.value.toString()
+                            )
+                        )
+                    }
+                    add(
+                        MetadataItem.PlainText(
+                            key = "Layer Norm RMS Epsilon",
+                            value = metadata.layerNormRmsEpsilon.value.toString()
+                        )
+                    )
+                    
+                    // RoPE properties
+                    metadata.ropeDimensionCount?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "RoPE Dimension Count",
+                                value = it.value.toString()
+                            )
+                        )
+                    }
+                    metadata.ropeFreqBase?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "RoPE Frequency Base",
+                                value = it.value.toString()
+                            )
+                        )
+                    }
+                    
+                    // Tokenizer properties
+                    metadata.tokenizerModel?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "Tokenizer Model",
+                                value = it.value.value
+                            )
+                        )
+                    }
+                    metadata.chatTemplate?.let {
+                        add(
+                            MetadataItem.MultilineText(
+                                key = "Chat Template",
+                                value = it.value,
+                            )
+                        )
+                    }
+                    metadata.bosToken?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "BOS Token",
+                                value = it.value
+                            )
+                        )
+                    }
+                    metadata.eosToken?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "EOS Token",
+                                value = it.value
+                            )
+                        )
+                    }
+                    metadata.paddingToken?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "Padding Token",
+                                value = it.value
+                            )
+                        )
+                    }
+                    metadata.unknownToken?.let {
+                        add(MetadataItem.PlainText(key = "Unknown Token", value = it.value))
+                    }
+                }
+                is Deepseek2ModelMetadata -> {
+                    // LLM-specific properties
+                    add(
+                        MetadataItem.PlainText(
+                            key = "Context Length",
+                            value = metadata.contextLength.value.toString()
+                        )
+                    )
+                    add(
+                        MetadataItem.PlainText(
+                            key = "Embedding Length",
+                            value = metadata.embeddingLength.value.toString()
+                        )
+                    )
+                    add(
+                        MetadataItem.PlainText(
+                            key = "Block Count",
+                            value = metadata.blockCount.value.toString()
+                        )
+                    )
+                    add(
+                        MetadataItem.PlainText(
+                            key = "Feed Forward Length",
+                            value = metadata.feedForwardLength.value.toString()
+                        )
+                    )
+                    metadata.useParallelResidual?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "Use Parallel Residual",
+                                value = it.value.toString()
+                            )
+                        )
+                    }
+                    metadata.tensorDataLayout?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "Tensor Data Layout",
+                                value = it.value
+                            )
+                        )
+                    }
+                    metadata.expertCount?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "Expert Count",
+                                value = it.value.toString()
+                            )
+                        )
+                    }
+                    metadata.expertUsedCount?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "Expert Used Count",
+                                value = it.value.toString()
+                            )
+                        )
+                    }
+                    
+                    // Attention properties
+                    add(
+                        MetadataItem.PlainText(
+                            key = "Head Count",
+                            value = metadata.headCount.value.toString()
+                        )
+                    )
+                    metadata.headCountKv?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "Key Value Head Count",
+                                value = it.value.toString()
+                            )
+                        )
+                    }
+                    metadata.maxAlibiBias?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "Max Alibi Bias",
+                                value = it.value.toString()
+                            )
+                        )
+                    }
+                    metadata.clampKqv?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "Clamp KQV",
+                                value = it.value.toString()
+                            )
+                        )
+                    }
+                    metadata.layerNormEpsilon?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "Layer Norm Epsilon",
+                                value = it.value.toString()
+                            )
+                        )
+                    }
+                    add(
+                        MetadataItem.PlainText(
+                            key = "Layer Norm RMS Epsilon",
+                            value = metadata.layerNormRmsEpsilon.value.toString()
+                        )
+                    )
+                    metadata.keyLength?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "Key Length",
+                                value = it.value.toString()
+                            )
+                        )
+                    }
+                    metadata.valueLength?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "Value Length",
+                                value = it.value.toString()
+                            )
+                        )
+                    }
+                    
+                    // RoPE properties
+                    metadata.ropeDimensionCount?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "RoPE Dimension Count",
+                                value = it.value.toString()
+                            )
+                        )
+                    }
+                    metadata.ropeFreqBase?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "RoPE Frequency Base",
+                                value = it.value.toString()
+                            )
+                        )
+                    }
+                    metadata.ropeScaleLinear?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "RoPE Scale Linear",
+                                value = it.value.toString()
+                            )
+                        )
+                    }
+                    
+                    // RoPE Scaling properties
+                    metadata.ropeScalingType?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "RoPE Scaling Type",
+                                value = it.value.name
+                            )
+                        )
+                    }
+                    metadata.ropeScalingFactor?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "RoPE Scaling Factor",
+                                value = it.value.toString()
+                            )
+                        )
+                    }
+                    metadata.ropeScalingOriginalContextLength?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "RoPE Scaling Original Context Length",
+                                value = it.value.toString()
+                            )
+                        )
+                    }
+                    metadata.ropeScalingFineTuned?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "RoPE Scaling Fine Tuned",
+                                value = it.value.toString()
+                            )
+                        )
+                    }
+                    
+                    // SSM-specific properties
+                    metadata.ssmConvKernel?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "SSM Conv Kernel",
+                                value = it.value.toString()
+                            )
+                        )
+                    }
+                    metadata.ssmInnerSize?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "SSM Inner Size",
+                                value = it.value.toString()
+                            )
+                        )
+                    }
+                    metadata.ssmStateSize?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "SSM State Size",
+                                value = it.value.toString()
+                            )
+                        )
+                    }
+                    metadata.ssmTimeStepRank?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "SSM Time Step Rank",
+                                value = it.value.toString()
+                            )
+                        )
+                    }
+                    
+                    // Tokenizer properties
+                    metadata.tokenizerModel?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "Tokenizer Model",
+                                value = it.value.value
+                            )
+                        )
+                    }
+                    metadata.chatTemplate?.let {
+                        add(
+                            MetadataItem.MultilineText(
+                                key = "Chat Template",
+                                value = it.value,
+                            )
+                        )
+                    }
+                    metadata.bosToken?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "BOS Token",
+                                value = it.value
+                            )
+                        )
+                    }
+                    metadata.eosToken?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "EOS Token",
+                                value = it.value
+                            )
+                        )
+                    }
+                    metadata.paddingToken?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "Padding Token",
+                                value = it.value
+                            )
+                        )
+                    }
+                    metadata.separatorToken?.let {
+                        add(
+                            MetadataItem.PlainText(
+                                key = "Separator Token",
+                                value = it.value
+                            )
+                        )
+                    }
+                    metadata.unknownToken?.let {
+                        add(MetadataItem.PlainText(key = "Unknown Token", value = it.value))
+                    }
                 }
             }
         }

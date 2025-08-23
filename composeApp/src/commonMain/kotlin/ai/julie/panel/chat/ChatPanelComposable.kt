@@ -18,8 +18,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -149,16 +149,16 @@ internal fun ChatPlaceholder() {
         ) {
             Text(
                 text = "No Active Thread",
-                style = MaterialTheme.typography.h3,
-                color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = "Select a model and start a new chat to begin",
-                style = MaterialTheme.typography.body1,
-                color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
             )
 
             Spacer(modifier = Modifier.height(24.dp))

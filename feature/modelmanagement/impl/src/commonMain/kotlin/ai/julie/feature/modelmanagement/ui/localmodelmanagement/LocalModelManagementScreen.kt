@@ -17,10 +17,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
@@ -89,14 +89,14 @@ fun LocalModelManagementScreen(
                     ) {
                         Text(
                             text = "No models added yet",
-                            style = MaterialTheme.typography.h6,
-                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = "Click 'Add Local Model' to import your first model",
-                            style = MaterialTheme.typography.body2,
-                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                         )
                     }
                 } else {
@@ -127,8 +127,7 @@ private fun ModelItem(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = 4.dp,
-        backgroundColor = MaterialTheme.colors.surface,
+        elevation = androidx.compose.material3.CardDefaults.cardElevation(defaultElevation = 4.dp),
         shape = RoundedCornerShape(8.dp)
     ) {
         Column(
@@ -147,17 +146,17 @@ private fun ModelItem(
                 ) {
                     Text(
                         text = model.title.takeIf { it.isNotBlank() } ?: "Unnamed Model",
-                        style = MaterialTheme.typography.h6,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f),
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                         maxLines = 1
 
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = model.description.takeIf { it.isNotBlank() } ?: "No description available",
-                        style = MaterialTheme.typography.body2,
-                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                         maxLines = 3
                     )
                 }
@@ -166,7 +165,7 @@ private fun ModelItem(
                     Icon(
                         Icons.Default.Delete,
                         contentDescription = "Delete",
-                        tint = MaterialTheme.colors.error
+                        tint = MaterialTheme.colorScheme.error
                     )
                 }
             }

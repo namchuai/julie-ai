@@ -8,7 +8,6 @@ androidx-appcompat = "1.7.0"
 androidx-core-ktx = "1.16.0"
 androidx-espresso-core = "3.6.1"
 androidx-lifecycle = "2.9.1"
-androidx-material = "1.12.0"
 androidx-test-junit = "1.2.1"
 compose-multiplatform = "1.9.0-beta03"
 junit = "4.13.2"
@@ -35,7 +34,6 @@ openaiClientRef = "4.0.1"
 kotbaseRef = "3.1.9-1.1.1"
 kotlinx-datetime = "0.6.2"
 kotlinx-io = "0.8.0"
-material = "1.10.0"
 jinjava = "2.7.0"
 filekit = "0.10.0-beta04"
 oshi = "6.8.2"
@@ -100,7 +98,6 @@ oshi-core = { module = "com.github.oshi:oshi-core", version.ref = "oshi" }
 sqldelight-jvm-driver = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "sqldelightJvmDriverRef" }
 sqldelight-android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = "sqlDelightRef" }
 sqldelight-native-driver = { module = "app.cash.sqldelight:native-driver", version.ref = "sqlDelightRef" }
-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 # Jinja template engine
 jinjava = { module = "com.hubspot.jinjava:jinjava", version.ref = "jinjava" }
