@@ -70,8 +70,8 @@ kotlin {
 tasks.register("copyNativeLibsForDesktop") {
     dependsOn(":core:llamabinding:llamacpp:buildHostCMake")
     doLast {
-        val sourceDir = file("llamacpp/build/cmake-build-host/lib")
-        val targetDir = file("src/desktopMain/resources")
+        val sourceDir = layout.projectDirectory.dir("llamacpp/build/cmake-build-host/lib").asFile
+        val targetDir = layout.projectDirectory.dir("src/desktopMain/resources").asFile
 
         if (sourceDir.exists()) {
             targetDir.mkdirs()

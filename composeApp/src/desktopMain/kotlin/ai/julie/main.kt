@@ -15,26 +15,64 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import kotlinx.coroutines.delay
+import ai.julie.logging.LoggingConfig
 import io.github.vinceglb.filekit.FileKit
+import kotbase.CouchbaseLite
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.reload.DevelopmentEntryPoint
 import org.koin.core.context.startKoin
 
 fun main() {
-    // Initialize FileKit
-    FileKit.init(appId = "Julie")
+    val crashLogFile = java.io.File(System.getProperty("user.home"), "julie_crash.log")
 
-    val koin = startKoin {
-        modules(desktopAppModule)
-    }.koin
+    try {
+        // CRITICAL: Create ~/.julie directory and CouchbaseLite temp directory FIRST
+        try {
+            val userHome = System.getProperty("user.home") ?: "/tmp"
+            val julieDir = java.io.File("$userHome/.julie")
+            if (!julieDir.exists()) {
+                julieDir.mkdirs()
+            }
+            val cblTemp = java.io.File(julieDir, "CouchbaseLiteTemp")
+            if (!cblTemp.exists()) {
+                cblTemp.mkdirs()
+            }
+        } catch (e: Exception) {
+            println("Warning: Cannot create Julie directories: ${e.message}")
+        }
 
-    // Load window settings before creating the window
-    val mainWindowRepository = koin.get<MainWindowRepository>()
-    val initialSettings = runBlocking {
-        mainWindowRepository.getMainWindowSetting()
-    }
-    
-    return application {
+        // Initialize CouchbaseLite with ~/.julie as root directory
+        try {
+            val rootDir = java.io.File(System.getProperty("user.home") ?: "/tmp", ".julie")
+            CouchbaseLite.init(true, rootDir, rootDir)
+        } catch (e: Exception) {
+            println("Warning: Cannot initialize CouchbaseLite: ${e.message}")
+        }
+
+        // Write crash log to file
+        System.setErr(java.io.PrintStream(java.io.FileOutputStream(crashLogFile, true)))
+
+        // Initialize logging FIRST so all subsequent logs are captured
+        LoggingConfig.initializeLogging()
+
+        // Initialize FileKit
+        FileKit.init(appId = "Julie")
+
+        // Set proper working directory
+        val safeDir = System.getProperty("user.home") ?: "/tmp"
+        System.setProperty("user.dir", safeDir)
+
+        val koin = startKoin {
+            modules(desktopAppModule)
+        }.koin
+
+        // Load window settings before creating the window
+        val mainWindowRepository = koin.get<MainWindowRepository>()
+        val initialSettings = runBlocking {
+            mainWindowRepository.getMainWindowSetting()
+        }
+
+        return application {
         val windowSetting = initialSettings
         
         val windowState = rememberWindowState(
@@ -80,9 +118,16 @@ fun main() {
             DevelopmentEntryPoint {
                 DesktopApp(
                     window = window,
-                    windowState = windowState,
                 )
             }
         }
+    }
+    } catch (e: Throwable) {
+        crashLogFile.appendText("\n=== CRASH AT ${java.time.LocalDateTime.now()} ===\n")
+        crashLogFile.appendText("Exception: ${e.message}\n")
+        crashLogFile.appendText("Stack trace:\n${e.stackTraceToString()}\n")
+        crashLogFile.appendText("Cause: ${e.cause}\n")
+        crashLogFile.appendText("=== END CRASH ===\n")
+        throw e
     }
 }

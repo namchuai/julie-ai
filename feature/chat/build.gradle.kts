@@ -24,6 +24,7 @@ kotlin {
             implementation(projects.feature.modelconfig.impl)
             implementation(projects.feature.toolexecutor.api)
             implementation(projects.feature.toolexecutor.impl)
+            implementation(projects.core.eventbus.api)
 
             implementation(libs.navigation.compose)
             implementation(libs.androidx.lifecycle.viewmodel)

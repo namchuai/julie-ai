@@ -1,5 +1,6 @@
 package ai.julie.di
 
+import ai.julie.core.eventbus.di.eventBusModule
 import ai.julie.feature.appsetting.di.appSettingModule
 import ai.julie.feature.chat.di.chatModule
 import ai.julie.feature.hardwaremonitor.di.hardwareMonitorModule
@@ -17,6 +18,7 @@ import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 val appModule = module {
+    includes(eventBusModule)
     includes(appSettingModule)
     includes(chatModule)
     includes(threadModule)

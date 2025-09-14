@@ -60,9 +60,9 @@ kotlin {
 tasks.register("copyNativeLibsForDesktop") {
     dependsOn(":core:whisperbinding:whispercpp:buildHostCMake")
     doLast {
-        val sourceDir = file("whispercpp/build/lib")
-        val resourceDir = file("src/desktopMain/resources")
-        val buildDir = file("build/native-libs")
+        val sourceDir = layout.projectDirectory.dir("whispercpp/build/lib").asFile
+        val resourceDir = layout.projectDirectory.dir("src/desktopMain/resources").asFile
+        val buildDir = layout.buildDirectory.dir("native-libs").get().asFile
 
         if (sourceDir.exists()) {
             // Copy to resources (for JAR packaging)
@@ -83,7 +83,7 @@ tasks.register("copyNativeLibsForDesktop") {
             }
 
             // Also copy to composeApp directory (for when running from composeApp)
-            val composeAppBuildDir = file("../../composeApp/core/whisperbinding/build/native-libs")
+            val composeAppBuildDir = layout.projectDirectory.dir("../../composeApp/core/whisperbinding/build/native-libs").asFile
             composeAppBuildDir.mkdirs()
             copy {
                 from(sourceDir)
@@ -99,7 +99,7 @@ tasks.register("copyNativeLibsForDesktop") {
             )
 
             for (ggmlSource in ggmlSources) {
-                val ggmlDir = file(ggmlSource)
+                val ggmlDir = layout.projectDirectory.dir(ggmlSource).asFile
                 if (ggmlDir.exists()) {
                     copy {
                         from(ggmlDir)
@@ -123,7 +123,7 @@ tasks.register("copyNativeLibsForDesktop") {
         } else {
             println("Source directory $sourceDir does not exist")
             println("Available directories in whispercpp/build/:")
-            file("whispercpp/build").listFiles()?.forEach {
+            layout.projectDirectory.dir("whispercpp/build").asFile.listFiles()?.forEach {
                 println("  - ${it.name}")
             }
         }

@@ -5,6 +5,9 @@ import ai.julie.core.common.doNotSaveState
 import ai.julie.core.common.viewModelState
 import ai.julie.core.domain.session.FlowOfPromptSession
 import ai.julie.core.domain.session.PromptSessionState
+import ai.julie.core.eventbus.ErrorEvent
+import ai.julie.core.eventbus.ErrorType
+import ai.julie.core.eventbus.EventBus
 import ai.julie.feature.chat.domain.LocalInferenceUseCase
 import ai.julie.feature.chat.domain.SimpleInferenceUseCase
 import ai.julie.feature.message.domain.CreateMessage
@@ -13,7 +16,9 @@ import ai.julie.feature.modelconfig.domain.FlowOfSamplingPresets
 import ai.julie.feature.modelconfig.domain.preset.SamplingPreset
 import ai.julie.feature.modelmanagement.domain.FlowOfRunningModels
 import ai.julie.feature.modelmanagement.domain.FlowOfStartingModels
+import ai.julie.feature.modelmanagement.domain.ValidateModel
 import ai.julie.feature.thread.domain.FlowOfActiveThread
+import ai.julie.feature.thread.domain.model.EnrichedThread
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.combine
@@ -34,6 +39,8 @@ class ChatInputViewModel(
     private val createMessage: CreateMessage,
     private val localInferenceUseCase: LocalInferenceUseCase,
     private val simpleInferenceUseCase: SimpleInferenceUseCase,
+    private val validateModel: ValidateModel,
+    private val eventBus: EventBus,
 ) : ViewModel() {
 
     // Flag to switch between implementations - set to true to use new orchestrator approach
@@ -45,6 +52,8 @@ class ChatInputViewModel(
         loadTimeReporter = doNotReportLoadTime()
     )
 
+    private var activeThread: EnrichedThread? = null
+
     fun onMessageUpdate(message: String) {
         state.value = state.value.copy(message = message)
     }
@@ -52,18 +61,13 @@ class ChatInputViewModel(
     fun onSendClick() {
         if (state.value.message.isBlank()) return
 
-        viewModelScope.launch {
-            val thread = flowOfActiveThread.flowOfActiveThread().firstOrNull()
-            if (thread == null) {
-                // TODO: show error popup instead of just logging
-                return@launch
-            }
-
-            // Check if there's already an active session
-            if (state.value.sessionState is PromptSessionState.Running) {
-                // TODO: show message that session is already running
-                return@launch
-            }
+        activeThread?.let { thread ->
+            viewModelScope.launch {
+                // Check if there's already an active session
+                if (state.value.sessionState is PromptSessionState.Running) {
+                    // TODO: show message that session is already running
+                    return@launch
+                }
 
 //            val modelIsStarting = flowOfStartingModels.flowOfStartingModels().firstOrNull()?.let {
 //                it.any { startingModels ->
@@ -85,31 +89,60 @@ class ChatInputViewModel(
 //                return@launch
 //            }
 
-            createMessage.createMessage(
-                threadId = thread.id,
-                content = state.value.message,
-                role = EnrichedRole.User,
-            )
+                // First, validate the model file exists
+                try {
+                    validateModel(thread.modelId)
+                } catch (e: IllegalArgumentException) {
+                    println("Model validation failed: ${e.message}")
+                    eventBus.emit(
+                        ErrorEvent(
+                            title = "Model Not Found",
+                            message = e.message ?: "The model file could not be found",
+                            type = ErrorType.ModelNotFound
+                        )
+                    )
+                    return@launch
+                } catch (e: Exception) {
+                    println("Model validation error: ${e.message}")
+                    eventBus.emit(
+                        ErrorEvent(
+                            title = "Error",
+                            message = "Failed to validate model: ${e.message}",
+                            type = ErrorType.General
+                        )
+                    )
+                    return@launch
+                }
 
-            state.update {
-                it.copy(message = "")
-            }
+                // Only create message and proceed if model is valid
+                createMessage.createMessage(
+                    threadId = thread.id,
+                    content = state.value.message,
+                    role = EnrichedRole.User,
+                )
 
-            if (useNewInferenceApproach) {
-                // Use the new orchestrator-based approach
-                simpleInferenceUseCase.invoke(
-                    threadId = thread.id,
-                    modelId = thread.modelId,
-                    samplingPreset = selectedSamplingPreset!!,
-                )
-            } else {
-                // Use the old approach
-                localInferenceUseCase.invoke(
-                    threadId = thread.id,
-                    modelId = thread.modelId,
-                    samplingPreset = selectedSamplingPreset!!,
-                )
+                state.update {
+                    it.copy(message = "")
+                }
+
+                if (useNewInferenceApproach) {
+                    // Use the new orchestrator-based approach
+                    simpleInferenceUseCase.invoke(
+                        threadId = thread.id,
+                        modelId = thread.modelId,
+                        samplingPreset = selectedSamplingPreset!!,
+                    )
+                } else {
+                    // Use the old approach
+                    localInferenceUseCase.invoke(
+                        threadId = thread.id,
+                        modelId = thread.modelId,
+                        samplingPreset = selectedSamplingPreset!!,
+                    )
+                }
             }
+        } ?: run {
+            println("No active thread found")
         }
     }
 
@@ -129,7 +162,9 @@ class ChatInputViewModel(
             flowOfActiveThread.flowOfActiveThread().filterNotNull(),
             flowOfSamplingPresets.flowOfSamplingPresets()
         ) { thread, presets ->
-            selectedSamplingPreset = presets.firstOrNull { it.id == thread.samplingPresetId } ?: presets.firstOrNull()
+            activeThread = thread
+            selectedSamplingPreset =
+                presets.firstOrNull { it.id == thread.samplingPresetId } ?: presets.firstOrNull()
         }.launchIn(viewModelScope)
 
         flowOfActiveThread.flowOfActiveThread()
