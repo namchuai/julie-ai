@@ -3,6 +3,9 @@ package ai.julie
 import ai.julie.component.windowcontrols.DraggableTitleBar
 import ai.julie.component.windowcontrols.MacOSWindowControls
 import ai.julie.core.designsystem.component.AppTheme
+import ai.julie.core.designsystem.component.components.AlertDialog
+import ai.julie.core.eventbus.ErrorEvent
+import ai.julie.core.eventbus.EventBus
 import ai.julie.navigation.DesktopNavGraph
 import ai.julie.ui.bottomstatusbar.BottomStatusBar
 import androidx.compose.foundation.background
@@ -15,25 +18,45 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.WindowState
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinContext
+import org.koin.compose.koinInject
 import java.awt.Window
 
 @Composable
 @Preview
 fun DesktopApp(
-    window: Window? = null,
-    windowState: WindowState? = null
+    window: Window? = null
 ) {
     AppTheme {
         KoinContext {
+            val eventBus = koinInject<EventBus>()
+            var showErrorDialog by remember { mutableStateOf(false) }
+            var errorTitle by remember { mutableStateOf("") }
+            var errorMessage by remember { mutableStateOf("") }
+            
+            LaunchedEffect(eventBus) {
+                eventBus.events().collect { event ->
+                    when (event) {
+                        is ErrorEvent -> {
+                            errorTitle = event.title
+                            errorMessage = event.message
+                            showErrorDialog = true
+                        }
+                    }
+                }
+            }
             Box(modifier = Modifier.fillMaxSize()) {
                 // Shadow layer
                 Box(
@@ -82,6 +105,26 @@ fun DesktopApp(
                         BottomStatusBar()
                     }
                 }
+            }
+            
+            // Global error dialog
+            if (showErrorDialog) {
+                AlertDialog(
+                    onDismissRequest = {
+                        showErrorDialog = false
+                        errorMessage = ""
+                        errorTitle = ""
+                    },
+                    onConfirmClick = {
+                        showErrorDialog = false
+                        errorMessage = ""
+                        errorTitle = ""
+                    },
+                    title = errorTitle,
+                    text = errorMessage,
+                    confirmButtonText = "OK",
+                    dismissButtonText = null
+                )
             }
         }
     }

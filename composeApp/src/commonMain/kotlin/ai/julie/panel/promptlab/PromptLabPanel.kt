@@ -3,14 +3,12 @@ package ai.julie.panel.promptlab
 import ai.julie.feature.promptlab.ui.project.ProjectListScreen
 import ai.julie.feature.promptlab.ui.prompttemplate.PromptTemplateScreen
 import ai.julie.feature.promptlab.ui.templatelist.PromptTemplateListScreen
-import ai.julie.feature.promptlab.ui.test.TestSessionScreen
 import ai.julie.feature.promptlab.ui.workspace.WorkspaceListScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 
 sealed class PromptLabRoute {
     object WorkspaceList : PromptLabRoute()
@@ -19,14 +17,11 @@ sealed class PromptLabRoute {
     data class PromptTemplate(val projectId: String, val templateId: String? = null) :
         PromptLabRoute()
 
-    data class TestSession(val templateId: String) : PromptLabRoute()
     data class VersionHistory(val templateId: String) : PromptLabRoute()
 }
 
 @Composable
-fun PromptLabPanel(
-    modifier: Modifier = Modifier
-) {
+fun PromptLabPanel() {
     var currentRoute by remember { mutableStateOf<PromptLabRoute>(PromptLabRoute.WorkspaceList) }
 
     when (val route = currentRoute) {
@@ -55,14 +50,11 @@ fun PromptLabPanel(
             PromptTemplateListScreen(
                 projectId = route.projectId,
                 projectName = route.projectName,
-                onNavigateBack = {
-                    currentRoute = PromptLabRoute.ProjectList(route.projectId)
-                },
                 onNavigateToTemplate = { templateId ->
                     currentRoute = PromptLabRoute.PromptTemplate(route.projectId, templateId)
                 },
                 onNavigateToTest = { templateId ->
-                    currentRoute = PromptLabRoute.TestSession(templateId)
+//                    currentRoute = PromptLabRoute.TestSession(templateId)
                 },
                 onNavigateToHistory = { templateId ->
                     currentRoute = PromptLabRoute.VersionHistory(templateId)
@@ -74,11 +66,8 @@ fun PromptLabPanel(
             PromptTemplateScreen(
                 projectId = route.projectId,
                 templateId = route.templateId,
-                onNavigateBack = {
-                    currentRoute = PromptLabRoute.TemplateList(route.projectId, "Project")
-                },
                 onNavigateToTest = { templateId ->
-                    currentRoute = PromptLabRoute.TestSession(templateId)
+//                    currentRoute = PromptLabRoute.TestSession(templateId)
                 },
                 onNavigateToHistory = { templateId ->
                     currentRoute = PromptLabRoute.VersionHistory(templateId)
@@ -86,16 +75,16 @@ fun PromptLabPanel(
             )
         }
 
-        is PromptLabRoute.TestSession -> {
-            TestSessionScreen(
-                templateId = route.templateId,
-                onNavigateBack = {
-                    // For now, go back to workspace list since we don't have the projectId
-                    // TODO: Store projectId in TestSession route
-                    currentRoute = PromptLabRoute.WorkspaceList
-                }
-            )
-        }
+//        is PromptLabRoute.TestSession -> {
+//            TestSessionScreen(
+//                templateId = route.templateId,
+//                onNavigateBack = {
+//                    // For now, go back to workspace list since we don't have the projectId
+//                    // TODO: Store projectId in TestSession route
+//                    currentRoute = PromptLabRoute.WorkspaceList
+//                }
+//            )
+//        }
 
         is PromptLabRoute.VersionHistory -> {
             // TODO: Implement version history screen

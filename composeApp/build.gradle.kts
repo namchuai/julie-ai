@@ -1,5 +1,4 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.compose.reload.ComposeHotRun
 import org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag
 
 plugins {
@@ -53,6 +52,8 @@ kotlin {
             implementation(compose.materialIconsExtended)
 
             implementation(projects.core.model)
+            implementation(projects.core.data)
+            implementation(projects.core.logging)
             implementation(projects.feature.thread.api)
             implementation(projects.feature.thread.impl)
             implementation(projects.feature.toolmanagement.api)
@@ -65,22 +66,22 @@ kotlin {
             implementation(projects.feature.message.api)
             implementation(projects.feature.message.impl)
             implementation(projects.feature.jinjaparser.impl)
-            implementation(projects.feature.promptlab)
+            implementation(projects.feature.promptlab.api)
+            implementation(projects.feature.promptlab.impl)
             implementation(projects.feature.pythonrunner.api)
             implementation(projects.feature.pythonrunner.impl)
             implementation(projects.feature.hardwaremonitor.api)
             implementation(projects.feature.hardwaremonitor.impl)
             implementation(projects.feature.appsetting.api)
             implementation(projects.feature.appsetting.impl)
+            implementation(projects.core.eventbus.api)
+            implementation(projects.core.eventbus.impl)
 
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
             implementation(libs.koin.composeVM)
             implementation(libs.navigation.compose)
-        }
-
-        iosMain.dependencies {
-            implementation(libs.ktor.client.darwin)
+            implementation(libs.kotbase)
         }
 
         val desktopMain by getting
@@ -146,8 +147,8 @@ compose.desktop {
 
         // Define paths to all possible native library locations
         val llamacppProject = project(":core:llamabinding:llamacpp")
-        val cmakeBuildDirLib = llamacppProject.buildDir.resolve("cmake-build-host/lib")
-        val cmakeBuildDirBin = llamacppProject.buildDir.resolve("cmake-build-host/bin")
+        val cmakeBuildDirLib = llamacppProject.layout.buildDirectory.dir("cmake-build-host/lib").get().asFile
+        val cmakeBuildDirBin = llamacppProject.layout.buildDirectory.dir("cmake-build-host/bin").get().asFile
         val processedResourcesDir =
             layout.buildDirectory.dir("processedResources/desktop/main").get().asFile
 
@@ -178,30 +179,26 @@ compose.desktop {
     }
 }
 
-// Ensure native lib is copied before desktop resources are processed for packaging/running
-// Ensure this dependency points to the CORRECT module (:llamacpp) now
-tasks.named("desktopProcessResources").configure {
-    dependsOn(project(":core:llamabinding:llamacpp").tasks.named("copyHostNativeLib")) // Renamed task
-}
-
 composeCompiler {
     featureFlags.add(ComposeFeatureFlag.OptimizeNonSkippingGroups)
 }
 
-tasks.register<ComposeHotRun>("runHot") {
-    mainClass.set("ai.julie.MainKt")
+// Make packaging tasks depend on copying native libraries to resources
+tasks.matching { task -> 
+    task.name.contains("package", ignoreCase = true)
+}.configureEach {
+    dependsOn(project(":core:llamabinding:llamacpp").tasks.named("copyHostNativeLib"))
 }
 
 // --- Explicitly configure the 'run' task --- 
 tasks.withType<JavaExec>().configureEach { // Configure ALL JavaExec tasks (includes 'run')
-    // Depends on the native library being built
+    // Depends on the native library being built (but not copied - we use it directly from build dir)
     dependsOn(project(":core:llamabinding:llamacpp").tasks.named("buildHostCMake"))
-    dependsOn(project(":core:llamabinding:llamacpp").tasks.named("copyHostNativeLib"))
 
     // Set the system property directly on the task
     val llamacppProject = project(":core:llamabinding:llamacpp")
-    val cmakeBuildDirLib = llamacppProject.buildDir.resolve("cmake-build-host/lib")
-    val cmakeBuildDirBin = llamacppProject.buildDir.resolve("cmake-build-host/bin")
+    val cmakeBuildDirLib = llamacppProject.layout.buildDirectory.dir("cmake-build-host/lib").get().asFile
+    val cmakeBuildDirBin = llamacppProject.layout.buildDirectory.dir("cmake-build-host/bin").get().asFile
 
     // Also include the processed resources directory where libraries are copied
     val processedResourcesDir =

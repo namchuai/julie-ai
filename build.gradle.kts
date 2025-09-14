@@ -9,5 +9,5 @@ plugins {
     alias(libs.plugins.buildConfig) apply false
     alias(libs.plugins.composeHotReload) apply false
     alias(libs.plugins.lumo) apply false
-    alias(libs.plugins.modulegraph)
+    alias(libs.plugins.modulegraph) apply false
 }

@@ -59,6 +59,8 @@ val chatModule = module {
             createMessage = get(),
             localInferenceUseCase = get(),
             simpleInferenceUseCase = get(),
+            validateModel = get(),
+            eventBus = get(),
         )
     }
 }

@@ -1,5 +1,6 @@
 package ai.julie.feature.chat.ui.chatinput
 
+import ai.julie.core.designsystem.component.components.AlertDialog
 import ai.julie.core.designsystem.component.components.Icon
 import ai.julie.core.designsystem.component.components.Text
 import ai.julie.core.designsystem.component.components.textfield.TextField

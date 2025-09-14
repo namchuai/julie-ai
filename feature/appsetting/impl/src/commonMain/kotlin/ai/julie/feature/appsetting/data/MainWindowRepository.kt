@@ -16,27 +16,43 @@ class MainWindowRepository private constructor(
 
     override suspend fun updateMainWindowSetting(setting: MainWindowSetting) =
         withContext(dispatcher) {
-            val db = Database(dbName)
-            val collection = db.getCollection(COLLECTION_NAME, SCOPE_NAME)
-
-            val document = setting.toDocument(DOCUMENT_ID)
-            collection?.save(document)
-            db.close()
+            try {
+                val db = Database(dbName)
+                val collection = db.getCollection(COLLECTION_NAME, SCOPE_NAME)
+                val document = setting.toDocument(DOCUMENT_ID)
+                collection?.save(document)
+                db.close()
+            } catch (e: Exception) {
+                println("Warning: Failed to save window settings: ${e.message}")
+            }
         }
 
     override suspend fun getMainWindowSetting(): MainWindowSetting = withContext(dispatcher) {
-        val db = Database(dbName)
-        val collection = db.getCollection(COLLECTION_NAME, SCOPE_NAME)
-
-        val result =
-            collection?.getDocument(DOCUMENT_ID)?.toMainWindowSetting() ?: MainWindowSetting()
-
-        db.close()
-        result
+        try {
+            val db = Database(dbName)
+            val collection = db.getCollection(COLLECTION_NAME, SCOPE_NAME)
+            val result = collection?.getDocument(DOCUMENT_ID)?.toMainWindowSetting() ?: MainWindowSetting()
+            db.close()
+            result
+        } catch (e: Exception) {
+            println("Warning: Failed to load window settings: ${e.message}")
+            MainWindowSetting()
+        }
     }
 
-    private fun initializeSettings() {1
-        Database(dbName).createCollection(COLLECTION_NAME, SCOPE_NAME)
+    private fun initializeSettings() {
+        try {
+            val db = Database(dbName)
+            try {
+                db.createCollection(COLLECTION_NAME, SCOPE_NAME)
+                db.close()
+            } catch (e: Exception) {
+                // Collection might already exist, that's okay
+                db.close()
+            }
+        } catch (e: Exception) {
+            println("Warning: Database initialization failed: ${e.message}")
+        }
     }
 
     companion object {

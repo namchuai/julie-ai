@@ -3,6 +3,7 @@ package ai.julie.feature.modelmanagement.di
 import ai.julie.core.domain.di.domainModule
 import ai.julie.feature.modelconfig.di.modelConfigModule
 import ai.julie.feature.modelmanagement.data.LocalModelRepository
+import ai.julie.feature.modelmanagement.data.LocalModelValidator
 import ai.julie.feature.modelmanagement.data.ModelExecutionRepository
 import ai.julie.feature.modelmanagement.domain.AddLocalModelFromFileUseCase
 import ai.julie.feature.modelmanagement.domain.DeleteLocalModel
@@ -15,6 +16,7 @@ import ai.julie.feature.modelmanagement.domain.StartModel
 import ai.julie.feature.modelmanagement.domain.StopAllModels
 import ai.julie.feature.modelmanagement.domain.StopModel
 import ai.julie.feature.modelmanagement.domain.StoreLocalModel
+import ai.julie.feature.modelmanagement.domain.ValidateModel
 import ai.julie.feature.modelmanagement.navigation.ModelManagementNavigation
 import ai.julie.feature.modelmanagement.navigation.ModelManagementNavigationImpl
 import ai.julie.feature.modelmanagement.ui.localmodelmanagement.LocalModelManagementViewModel
@@ -58,6 +60,9 @@ val modelManagementModule = module {
     single<StopModel> { get<ModelExecutionRepository>() }
     single<StopAllModels> { get<ModelExecutionRepository>() }
     single<ReloadModel> { get<ModelExecutionRepository>() }
+
+    single<LocalModelValidator> { LocalModelValidator(get()) }
+    single<ValidateModel> { get<LocalModelValidator>() }
 
     // Navigation binding
     singleOf(::ModelManagementNavigationImpl) bind ModelManagementNavigation::class

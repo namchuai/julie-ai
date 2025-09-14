@@ -1,7 +1,6 @@
 package ai.julie.core.domain.di
 
 import ai.julie.core.data.di.dataModule
-import ai.julie.core.data.llama.LlamaRepository
 import ai.julie.core.domain.DownloadWhisperModelUseCase
 import ai.julie.core.domain.GetWhisperModelsUseCase
 import ai.julie.core.domain.InitWhisperModelUseCase
@@ -10,7 +9,6 @@ import ai.julie.core.domain.RecordAndTranscribeUseCase
 import ai.julie.core.domain.RequestMicrophonePermissionUseCase
 import ai.julie.core.domain.TranscribeAudioUseCase
 import ai.julie.core.domain.model.download.DownloadModelViaUrlUseCase
-import ai.julie.core.domain.prompt.RenderPromptUseCase
 import ai.julie.core.domain.session.FlowOfPromptSession
 import ai.julie.core.domain.session.PromptSessionManager
 import ai.julie.core.domain.session.PromptSessionManagerImpl
@@ -23,7 +21,6 @@ val domainModule = module {
     includes(networkModule)
 
     factoryOf(::DownloadModelViaUrlUseCase)
-    factoryOf(::RenderPromptUseCase)
     factoryOf(::InitWhisperModelUseCase)
     factoryOf(::TranscribeAudioUseCase)
     factoryOf(::ManageWhisperSystemUseCase)

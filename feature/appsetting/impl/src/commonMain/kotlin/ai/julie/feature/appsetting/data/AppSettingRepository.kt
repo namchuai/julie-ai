@@ -41,7 +41,9 @@ class AppSettingRepository private constructor(
     }
 
     private fun initializeSettings() {
-        Database(dbName).createCollection(COLLECTION_NAME, SCOPE_NAME)
+        val db = Database(dbName)
+        db.createCollection(COLLECTION_NAME, SCOPE_NAME)
+        db.close()
     }
 
     companion object {

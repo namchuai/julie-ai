@@ -29,35 +29,35 @@ val ndkToolchainFile = ndkDir?.let { File(it, "build/cmake/android.toolchain.cma
 plugins { `base` }
 
 // --- Configuration for Host (Desktop) Build ---
-val hostCmakeBuildDir = "${buildDir}/cmake-build-host"
-val cmakeSrcDir = project.projectDir // CMakeLists.txt is at the root of whispercpp
+private val hostCmakeBuildDirName = "cmake-build-host"
+private fun getHostCmakeBuildDir() = layout.buildDirectory.dir(hostCmakeBuildDirName).get().asFile
 
 tasks.register<Exec>("configureHostCMake") {
     group = "Build Native"
     description = "Configures the host build using CMake."
-    workingDir = cmakeSrcDir
+    workingDir = layout.projectDirectory.asFile
 
     // Improved input tracking
-    inputs.file(project.file("CMakeLists.txt"))
-    inputs.dir(project.file("src/whisper.cpp"))
-    inputs.dir(project.file("src/main/cpp"))
+    inputs.file(layout.projectDirectory.file("CMakeLists.txt"))
+    inputs.dir(layout.projectDirectory.dir("src/whisper.cpp"))
+    inputs.dir(layout.projectDirectory.dir("src/main/cpp"))
     inputs.property("buildType", "Release")
 
     // Output tracking
-    outputs.dir(hostCmakeBuildDir)
+    outputs.dir(getHostCmakeBuildDir())
     outputs.cacheIf { true } // Enable caching
 
     // Only run if inputs changed or outputs don't exist
     onlyIf {
-        !file("$hostCmakeBuildDir/CMakeCache.txt").exists() || inputs.hasInputs
+        !File(getHostCmakeBuildDir(), "CMakeCache.txt").exists() || inputs.hasInputs
     }
 
     doFirst {
-        Files.createDirectories(Paths.get(hostCmakeBuildDir))
+        Files.createDirectories(getHostCmakeBuildDir().toPath())
     }
     commandLine(
         "/usr/bin/env", "cmake", ".",
-        "-B", hostCmakeBuildDir,
+        "-B", getHostCmakeBuildDir().absolutePath,
         "-DCMAKE_BUILD_TYPE=Release",
         "-DWHISPER_BUILD_TESTS=OFF",
         "-DWHISPER_BUILD_EXAMPLES=OFF"
@@ -68,17 +68,17 @@ tasks.register<Exec>("buildHostCMake") {
     group = "Build Native"
     description = "Builds the host shared library using CMake."
     dependsOn("configureHostCMake")
-    workingDir = project.file(hostCmakeBuildDir)
+    workingDir = getHostCmakeBuildDir()
 
     // Input tracking - the configuration and source files
-    inputs.dir(hostCmakeBuildDir).withPropertyName("cmakeConfig")
-    inputs.dir(project.file("src/whisper.cpp")).withPropertyName("whisperSource")
-    inputs.dir(project.file("src/main/cpp")).withPropertyName("jniSource")
+    inputs.dir(getHostCmakeBuildDir()).withPropertyName("cmakeConfig")
+    inputs.dir(layout.projectDirectory.dir("src/whisper.cpp")).withPropertyName("whisperSource")
+    inputs.dir(layout.projectDirectory.dir("src/main/cpp")).withPropertyName("jniSource")
     inputs.property("buildConfig", "Release")
 
     // Output tracking
-    outputs.dir("${hostCmakeBuildDir}/lib").withPropertyName("libDir")
-    outputs.dir("${hostCmakeBuildDir}/bin").withPropertyName("binDir")
+    outputs.dir(File(getHostCmakeBuildDir(), "lib")).withPropertyName("libDir")
+    outputs.dir(File(getHostCmakeBuildDir(), "bin")).withPropertyName("binDir")
     outputs.cacheIf { true } // Enable caching
 
     // Only run if libraries don't exist or inputs changed
@@ -94,7 +94,7 @@ tasks.register<Exec>("buildHostCMake") {
 
     onlyIf {
         libsToCopy.any { lib ->
-            !file("${hostCmakeBuildDir}/lib/$lib").exists() && !file("${hostCmakeBuildDir}/bin/$lib").exists()
+            !File(getHostCmakeBuildDir(), "lib/$lib").exists() && !File(getHostCmakeBuildDir(), "bin/$lib").exists()
         }
     }
 
@@ -125,8 +125,8 @@ tasks.register<Copy>("copyHostNativeLib") {
         project(":composeApp").layout.buildDirectory.dir("processedResources/desktop/main")
 
     // Input tracking
-    inputs.files(fileTree("${hostCmakeBuildDir}/lib") { include(libsToCopy) })
-    inputs.files(fileTree("${hostCmakeBuildDir}/bin") { include(libsToCopy) })
+    inputs.files(fileTree(File(getHostCmakeBuildDir(), "lib")) { include(libsToCopy) })
+    inputs.files(fileTree(File(getHostCmakeBuildDir(), "bin")) { include(libsToCopy) })
 
     // Output tracking  
     outputs.dir(targetDir)
@@ -135,8 +135,8 @@ tasks.register<Copy>("copyHostNativeLib") {
     // Only run if target files don't exist or source files are newer
     onlyIf {
         libsToCopy.any { lib ->
-            val srcLib = file("${hostCmakeBuildDir}/lib/$lib")
-            val srcBin = file("${hostCmakeBuildDir}/bin/$lib")
+            val srcLib = File(getHostCmakeBuildDir(), "lib/$lib")
+            val srcBin = File(getHostCmakeBuildDir(), "bin/$lib")
             val target = targetDir.get().asFile.resolve(lib)
 
             val srcFile = when {
@@ -152,8 +152,8 @@ tasks.register<Copy>("copyHostNativeLib") {
     logger.lifecycle("Host libraries to copy: $libsToCopy")
 
     // Assuming JNI lib is in 'lib' and dependencies are in 'bin' after build
-    from("${hostCmakeBuildDir}/lib") { include(libsToCopy.first()) }
-    from("${hostCmakeBuildDir}/bin") { include(libsToCopy.drop(1)) }
+    from(File(getHostCmakeBuildDir(), "lib")) { include(libsToCopy.first()) }
+    from(File(getHostCmakeBuildDir(), "bin")) { include(libsToCopy.drop(1)) }
 
     into(targetDir)
 }
@@ -168,7 +168,7 @@ tasks.named("build") {
 tasks.register<Delete>("cleanCMakeBuilds") {
     group = "Build"
     description = "Deletes all CMake build directories."
-    delete(hostCmakeBuildDir) // Only clean host build dir now
+    delete(getHostCmakeBuildDir()) // Only clean host build dir now
 }
 
 tasks.named("clean") {
